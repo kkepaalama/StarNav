@@ -1,4 +1,5 @@
 import numpy as np
+import math as m
 
 def v(x, y, z):
     return np.array([[x], [y], [z]])
@@ -49,11 +50,9 @@ def R_bi(q):
     a31 = 2*(q1*q3 - q0*q2)
     a32 = 2*(q2*q3 + q0*q1)
     a33 = 2*(q0**2 + q3**2) -1
-    
     return np.array([[a11, a12, a13], 
                      [a21, a22, a23],
                      [a31, a32, a33]])
-
 
 def n_sensed(q):
     n1 = q[0]/(np.sin(np.arccos(q[3])))
@@ -64,23 +63,17 @@ def n_sensed(q):
 
 def pos(phi, theta, psi, n_sensed):
     x_rot = np.array([[1, 0, 0],
-                      [0, np.cos(-phi), -np.sin(-phi)],
-                      [0, np.sin(-phi), np.cos(-phi)]])
-
-    y_rot = np.array([[np.cos(-theta), 0, np.sin(-theta)],
+                      [0, np.cos(-phi*(np.pi/180)), -np.sin(-phi*(np.pi/180))],
+                      [0, np.sin(-phi*(np.pi/180)), np.cos(-phi*(np.pi/180))]])
+    y_rot = np.array([[np.cos(-theta*(np.pi/180)), 0, np.sin(-theta*(np.pi/180))],
                       [0, 1, 0],
-                      [-np.sin(-theta), 0, np.cos(-theta)]])
-
-    z_rot = np.array([[np.cos(psi), -np.sin(psi), 0],
-                      [np.sin(psi), np.cos(psi), 0],
+                      [-np.sin(-theta*(np.pi/180)), 0, np.cos(-theta*(np.pi/180))]])
+    z_rot = np.array([[np.cos(psi*(np.pi/180)), -np.sin(psi*(np.pi/180)), 0],
+                      [np.sin(psi*(np.pi/180)), np.cos(psi*(np.pi/180)), 0],
                       [0, 0, 1]])
-    
     n_true = np.dot(np.dot(x_rot, np.dot(y_rot, z_rot)), n_sensed)
-    
     lat = np.pi/2 - np.arccos(n_true[2])
-    
     lon = np.arctan(n_true[1]/n_true[0])
-    
     return print(f'true position: {n_true}'), print(f'latitude: {lat}'), print(f'longitude: {lon}')
 
 
