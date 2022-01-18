@@ -1,4 +1,3 @@
-
 #Verification Code
 
 import numpy as np
