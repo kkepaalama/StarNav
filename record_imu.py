@@ -5,19 +5,7 @@ import IMU
 import datetime
 import os
 import sys
-from systemd import daemon
-import subprocess
 
-
-def CaptureImage():
-    
-    print ("Taking picture")
-    timestamp = time.time()
-    imagename = srt(time.time())
-    cmd = "raspistill -ISO 400 -ss 60000 -awb auto -w 4056 -h 3040 -t 1000 -o /home/pi/Desktop/Kalibr/samples_dynamicIMU/" + imagename + ".png"
-    subprocess.call(cmd, shell = True)
-    print(cmd)
-    print ("Done")
 
 IMU.detectIMU()     #Detect if BerryIMU is connected.
 if(IMU.BerryIMUversion == 99):
@@ -55,10 +43,6 @@ while True:#Read the accelerometer,gyroscope and magnetometer values
     
     if 1:
         output = [timestamp, ACCx, ACCy, ACCz, GYRx, GYRy, GYRz]
-    
-    CaptureImage()
-    
-    time.sleep(0.5)
     
     with open('/home/pi/Desktop/Kalibr/imu_dynamic.csv', 'a', encoding = 'UTF8', newline='') as f:
         writer = csv.writer(f)
