@@ -66,11 +66,3 @@ while True:#Read the accelerometer,gyroscope and magnetometer values
         
         
     
-    
-
-
-
-
-
-
-
