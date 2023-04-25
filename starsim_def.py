@@ -9,19 +9,6 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.linalg import norm
 from main import Rot, R
- 
-def R(angles):
-    x_rot = np.array([[1, 0, 0],
-                      [0, (np.cos(angles[0])), -np.sin(angles[0])],
-                      [0, np.sin(angles[0]), np.cos(angles[0])]])
-    y_rot = np.array([[np.cos(angles[1]), 0, np.sin(angles[1])],
-                      [0, 1, 0],
-                      [-np.sin(angles[1]), 0, np.cos(angles[1])]])
-    z_rot = np.array([[np.cos(angles[2]), -np.sin(angles[2]), 0],
-                      [np.sin(angles[2]), np.cos(angles[2]), 0],
-                      [0, 0, 1]])
-    n = np.dot(x_rot, np.dot(y_rot, z_rot))
-    return n
 
 fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1, projection='3d')
@@ -87,22 +74,22 @@ R = R(tilt)
 x_B, y_B, z_B = [0.2, 0, 0], [0, 0.2, 0], [0, 0, 0.2]
 RxB, RyB, RzB = np.dot(R, x_B), np.dot(R, y_B), np.dot(R, z_B)
 
-ax.quiver(originb[0],originb[1],originb[2], RxB[0], RxB[1], RxB[2], color="c")#,normalize=True)
-ax.quiver(originb[0],originb[1],originb[2], RyB[0], RyB[1], RyB[2], color="y")#,normalize=True)
-ax.quiver(originb[0],originb[1],originb[2], RzB[0], RzB[1], RzB[2], color="m")#,normalize=True)
+#ax.quiver(originb[0],originb[1],originb[2], RxB[0], RxB[1], RxB[2], color="c")#,normalize=True)
+#ax.quiver(originb[0],originb[1],originb[2], RyB[0], RyB[1], RyB[2], color="y")#,normalize=True)
+#ax.quiver(originb[0],originb[1],originb[2], RzB[0], RzB[1], RzB[2], color="m")#,normalize=True)
 
 
 xb = Rot(RxB, xL)
-#yb = Rot(RyB, yL)
-#zb = Rot(RzB, zL)
+yb = Rot(RyB, yL)
+zb = Rot(RzB, zL)
 
-xB = np.dot(xb, RxB)*1.2
-#yB = np.dot(yb, RyB)*1.2
-#zB = np.dot(zb, RzB)*1.2
+xB = np.dot(xb, RxB)*50
+yB = np.dot(yb, RyB)*50
+zB = np.dot(zb, RzB)*50
 
 ax.quiver(originb[0],originb[1],originb[2], xB[0], xB[1], xB[2], color="c", linestyle = 'dashed')#,normalize=True)
-#ax.quiver(originb[0],originb[1],originb[2], yB[0], yB[1], yB[2], color="y", linestyle = 'dashed')#,normalize=True)
-#ax.quiver(originb[0],originb[1],originb[2], zB[0], zB[1], zB[2], color="m", linestyle = 'dashed')#,normalize=True)
+ax.quiver(originb[0],originb[1],originb[2], yB[0], yB[1], yB[2], color="y", linestyle = 'dashed')#,normalize=True)
+ax.quiver(originb[0],originb[1],originb[2], zB[0], zB[1], zB[2], color="m", linestyle = 'dashed')#,normalize=True)
 
 #ax.quiver(originb[0],originb[1],originb[2], xB[0], xB[1], xB[2], color="c")#,normalize=True)
 #ax.quiver(originb[0],originb[1],originb[2], yB[0], yB[1], yB[2], color="y")#,normalize=True)
@@ -123,10 +110,10 @@ ax.quiver(origin[0], origin[1], origin[2], ye[0], ye[1], ye[2], color = 'blue')
 ax.quiver(origin[0], origin[1], origin[2], ze[0], ze[1], ze[2], color = 'green')
 u = np.linspace(0, np.pi, 30)
 v = np.linspace(0, 2 * np.pi, 30)
-x = np.outer(np.sin(u), np.sin(v))
-y = np.outer(np.sin(u), np.cos(v))
-z = np.outer(np.cos(u), np.ones_like(v))
-#ax.plot_wireframe(x, y, z, color = 'gray', alpha = 0.5)
+xe = np.outer(np.sin(u), np.sin(v))
+ye = np.outer(np.sin(u), np.cos(v))
+ze = np.outer(np.cos(u), np.ones_like(v))
+ax.plot_wireframe(xe, ye, ze, color = 'gray', alpha = 0.5)
 
     
 #stars
