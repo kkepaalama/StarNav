@@ -4,7 +4,7 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
-from main import Rot, R
+from main import Rot, R, R_inverse
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
@@ -51,15 +51,19 @@ ax.quiver(origo[0],origo[1],origo[2], Rz[0], Rz[1], Rz[2], color="m")#,normalize
 # verification1: shows counter rotation
 # determine how to rotate dashed quivers to match r, g, b quivers
 rad = np.pi/180
-tilt = [0*rad, 0*rad, 0*rad]
+#tilt = [30*rad, 10*rad, 10*rad]
 
-xb = Rot(Rx, xL)
+R_in = R_inverse(tilt)
+
+xB, yB, zB = np.dot(R_in, Rx)*1.2, np.dot(R_in, Ry)*1.2, np.dot(R_in, Rz)*1.2
+
+'''xb = Rot(Rx, xL)
 yb = Rot(Ry, yL)
 zb = Rot(Rz, zL)
 
 xB = np.dot(xb, Rx)*1.2
 yB = np.dot(yb, Ry)*1.2
-zB = np.dot(zb, Rz)*1.2
+zB = np.dot(zb, Rz)*1.2'''
 
 ax.quiver(origo[0],origo[1],origo[2], xB[0], xB[1], xB[2], color="c", linestyle = 'dashed')#,normalize=True)
 ax.quiver(origo[0],origo[1],origo[2], yB[0], yB[1], yB[2], color="y", linestyle = 'dashed')#,normalize=True)
