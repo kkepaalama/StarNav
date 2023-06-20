@@ -1,7 +1,7 @@
 #/usr/bin/python
 
 import numpy as np
-import math as m
+import math
 import geopy.distance
 import pymap3d
 
@@ -12,7 +12,7 @@ import astropy.units as u
 
 #data
 from ost_output_papakolea import s1
-from main import Rot, car2sph, sph2car, B, K, q, q2R
+from main import Rot, car2sph, sph2car, B, K, q
 
 
 #ITRS(Cel) to ITRS(ECEF)
@@ -41,17 +41,18 @@ def ecef2enu(lat, lon, position, vector):
     '''
     Transforms vector in the Earth-centered, Earth-fixed (ECEF) frame to East, North, Up (ENU) local frame
     lat: latitude from star_vector class, declination (DEC) component of <RA, DEC>
-    lon: longitude from star_vector class, right ascention (RA) component of <RA, DEC>
-    
+    lon: longitude from star_vector class, right ascention (RA) component of <RA, DEC>.
+       
     '''
-    T_EL = np.array([[-m.sin(lon),               m.cos(lon),                 0    , position[0]],
-                     [-m.cos(lon)*m.sin(lat),   -m.sin(lon)*m.sin(lat), m.cos(lat), position[1]],
-                     [ m.cos(lon)*m.cos(lat),    m.sin(lon)*m.cos(lat), m.sin(lat), position[2]],
+    T_EL = np.array([[-math.sin(lon),               math.cos(lon),                 0    , position[0]],
+                     [-math.cos(lon)*math.sin(lat),   -math.sin(lon)*math.sin(lat), math.cos(lat), position[1]],
+                     [ math.cos(lon)*math.cos(lat),    math.sin(lon)*math.cos(lat), math.sin(lat), position[2]],
                      [        0,                           0,                0,        1   ]])
     v = np.array([vector[0], vector[1], vector[2], 1])
     l = np.dot(T_EL, v)
     l = np.delete(l, 3)
     return l
+
 
 def ecef_to_enu(ecef_vector, latitude, longitude):
     # Convert latitude and longitude to radians
@@ -71,8 +72,8 @@ def ecef_to_enu(ecef_vector, latitude, longitude):
 
     # Perform the transformation
     enu_vector = np.dot(transformation_matrix, ecef_vector)
-
     return enu_vector
+
 
 #Local/ENU(East, North, Up)(Topocentric Coordinate Sys) to Rover(Body)
 def enu2body(tilt, local_vector): #where tilt is a 3x1 orientation vector gathered from IMU data and OST output
@@ -109,6 +110,7 @@ deg = 180/np.pi
 gts = 21.295084, -157.811978 # <lat, lon> of ground truth in decimal degrees
 gtc = np.array([-0.86272793, -0.35186237,  0.36317129])
 
+
 #ideal conditions
 '''lat, lon = 21.295084*rad, -157.811978*rad    #initial position
 #lat, lon = 21*rad, -157*rad        #initial position
@@ -130,7 +132,6 @@ pe = car2sph(p_e)       #final position estimate
 print(pe)'''
 
 
-
 '''for i in np.linspace(0, np.pi/2, num=11):
     tilt = [0, i, 0]    
     init_b = enu2body(tilt, init_l)
@@ -147,6 +148,7 @@ print(pe)'''
 #latlone = cel2ecef(s1.time, s1.cel, s1.radec, 'radec2sph')
 #latlon_e = 18.28441551*rad, 200.99184445*rad #latlon_e shortcut (transfromed vector from cel to ecef)
 test = [18.28441551*rad, 200.99184445*rad] #21.295084*rad, -157.811978*rad
+est = [18.28441551, 200.99184445]
 #car_e = cel2ecef(s1.time, s1.cel, s1.radec, 'radec2car') #transformed vector from cel to ecef (cartesian)
 #s_e = sph2car(latlon_e[0], latlon_e[1]) 
 s_e = sph2car(test[0], test[1]) 
@@ -163,8 +165,8 @@ s1.ecef = np.array([-0.89138523, -0.39121153,  0.22887966])
 s1.ecef = [s1.ecef[0], s1.ecef[1], s1.ecef[2]]
 init_l = ecef_to_enu(s1.body[0], test[0], test[1])
 #init_l = ecef_to_enu(s_e, 18.28441551, 200.99184445)
-#tilt = [0*rad, 0*rad, 0*rad]
-tilt = [0.06161487984311333, 0.03387764611236473, -23.6*rad]
+tilt = [0*rad, 0*rad, 0*rad]
+#tilt = [0.06161487984311333, 0.03387764611236473, -23.6*rad]
 #init_b = R(tilt, init_l)
 init_b = enu2body(tilt, init_l)
 
@@ -176,12 +178,8 @@ p_e = p_E/np.linalg.norm(p_E)
 pe = car2sph(p_e)
 print(pe)
 
-B = B(p_e, gtc, 1)
-K = K(B)
-q = q(K)
-r = q2R(q)
-a = car2sph(np.dot(r, p_e))
 
 coords_1 = (gts[0], gts[1])
 coords_2 = (pe[0], pe[1])
 print(geopy.distance.geodesic(coords_1, coords_2).miles, 'miles    ', geopy.distance.geodesic(coords_1, coords_2).km, 'km')
+

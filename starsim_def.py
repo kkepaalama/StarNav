@@ -1,4 +1,4 @@
-#/usr/bin/python
+ #/usr/bin/python
 
 ### Purpose of this simulation to to show a visual of a rover located on Earths surface, with the z-axis pointed towards the celestial shpere
 ### The visuals are not to scale
@@ -8,10 +8,24 @@ import random as ran
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.linalg import norm
-from main import Rot, R
+import main as m
+import frame_trans as f
 
 fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1, projection='3d')
+
+#earth frame
+oE = np.array([0, 0, 0]) 
+xE = np.array([1, 0, 0])
+yE = np.array([0, 1, 0])
+zE = np.array([0, 0, 1])
+
+ax.quiver(oE[0], oE[1], oE[2], xE[0], xE[1], xE[2], color = 'red')
+ax.quiver(oE[0], oE[1], oE[2], yE[0], yE[1], yE[2], color = 'blue')
+ax.quiver(oE[0], oE[1], oE[2], zE[0], zE[1], zE[2], color = 'green')
+
+sE = f.s_e
+#ax.quiver(oE[0], oE[1], oE[2], sE[0], sE[1], sE[2], color = 'orange')
 
 #local frame
 ''' 
@@ -21,42 +35,57 @@ of the local frame is normal to the surface. The gravity vector of the local fra
 is anti-parallel to the normal vector. The x-axis and y-axis are orthogonal to the 
 z-axis which is also the normal vector.
 '''
-xr = np.array([0.3, 0, 0])
-yr = np.array([0, 0.3, 0])
-zr = np.array([0, 0, 0.3])
 
 #local frame at random point
 #s = ran.uniform(0, np.pi)
 #t = ran.uniform(0, np.pi)
 
 #local frame origin at known point
-lat = 21
-lon = 203
-x = np.cos(lat) * np.cos(lon)
-y = np.cos(lat) * np.sin(lon)
-z = np.sin(lat)
-originb = [x, y, z]
+#x_ecef2enu = f.ecef_to_enu(xE, f.est[0], f.est[1])
+#y_ecef2enu = f.ecef_to_enu(yE, f.est[0], f.est[1])
+#z_ecef2enu = f.ecef_to_enu(zE, f.est[0], f.est[1])
+
+#s_ecef2enu = f.ecef_to_enu(sE, f.est[0], f.est[1])
+
+x_ecef2enu = f.ecef2enu(f.est[0], f.est[1], f.s_e, xE)
+y_ecef2enu = f.ecef2enu(f.est[0], f.est[1], f.s_e, yE)
+z_ecef2enu = f.ecef2enu(f.est[0], f.est[1], f.s_e, zE)
+
+s_ecef2enu = f.ecef_to_enu(sE, f.est[0], f.est[1])
+o_local = f.s_e
+
 
 #local frame axes
 #phi = ran.uniform(-(np.pi/4), (np.pi/4)) #random roll within limits
 #theta = ran.uniform(-(np.pi/4), (np.pi/4)) #random pitch within limits
 #psi = ran.uniform(0, 2*np.pi) #random yaw within limits
 #angle_x = (phi, 0, 0)
-angle_y = (0, 90, 0)
+#angle_y = (0, 90, 0)
 #angle_z = (0, 0, psi)
 #Rx = Rot(angle_x)
-RyL = R(angle_y)
+#RyL = m.R(angle_y)
 #Rz = Rot(angle_z)
-yL = np.dot(RyL*0.1, originb)
-xL = np.cross(yL, originb)
-zL = np.array([originb[0], originb[1], originb[2]])*0.1
-#zb = np.dot(Rz*0.1, originb)
-ax.quiver(originb[0], originb[1], originb[2], xL[0], xL[1], xL[2], color = 'red') #heading vector
-ax.quiver(originb[0], originb[1], originb[2], yL[0], yL[1], yL[2], color = 'blue')
-#ax.quiver(originb[0], originb[1], originb[2], zb[0], zb[1], zb[2], color = 'red')
-#ax.quiver(originb[0], originb[1], originb[2], originb[0]*0.2, originb[1]*0.2, originb[2]*0.2, color = 'green') #normal vector
-ax.quiver(originb[0], originb[1], originb[2], zL[0], zL[1], zL[2], color = 'green') #normal vecor
-ax.quiver(originb[0], originb[1], originb[2], -originb[0]*0.1, -originb[1]*0.1, -originb[2]*0.1, color = 'orange') #gravity vector
+#yL = np.dot(RyL*0.1, o_local)
+#xL = np.cross(yL, o_local)
+#zL = np.array([o_local[0], o_local[1], o_local[2]])*0.1
+#zb = np.dot(Rz*0.1, o_local)
+
+#rad = np.pi/180
+#tilt = [30*rad, 30*rad, 10*rad]
+#tilt = [0, 0, 0]
+#R = m.R(tilt)
+#x_ecef2enu, y_ecef2enu, z_ecef2enu = np.dot(R, x_ecef2enu), np.dot(R, y_ecef2enu), np.dot(R, z_ecef2enu)
+
+ax.quiver(o_local[0], o_local[1], o_local[2], x_ecef2enu[0], x_ecef2enu[1], x_ecef2enu[2], color = 'red') #heading vector
+ax.quiver(o_local[0], o_local[1], o_local[2], y_ecef2enu[0], y_ecef2enu[1], y_ecef2enu[2], color = 'blue')
+ax.quiver(o_local[0], o_local[1], o_local[2], z_ecef2enu[0], z_ecef2enu[1], z_ecef2enu[2], color = 'green') #normal vecor
+#ax.quiver(o_local[0], o_local[1], o_local[2], -o_local[0]*0.1, -o_local[1]*0.1, -o_local[2]*0.1, color = 'orange') #gravity vector
+
+#ax.quiver(o_local[0], o_local[1], o_local[2], s_ecef2enu[0], s_ecef2enu[1], s_ecef2enu[2], color = 'orange') #heading vector
+
+
+
+
 ax.set_xlim([-1, 1])
 ax.set_ylim([-1, 1])
 ax.set_zlim([-1, 1])
@@ -68,7 +97,7 @@ ax.view_init(elev=30, azim=50)
 special orthoganal unit vectors to create a body frame with x, y, and z-axis.
 Body frame origin shares the same origin as local frame.
 '''
-rad = np.pi/180
+'''rad = np.pi/180
 tilt = [0*rad, 0*rad, 0*rad]
 R = R(tilt)
 x_B, y_B, z_B = [0.2, 0, 0], [0, 0.2, 0], [0, 0, 0.2]
@@ -101,7 +130,7 @@ ax.quiver(originb[0],originb[1],originb[2], zB[0], zB[1], zB[2], color="m", line
 ''' 
 a sphere with radius r = 1 centered at [0, 0, 0] 
 '''
-origin = [0, 0, 0]
+'''origin = [0, 0, 0]
 xe = np.array([0.1, 0, 0])
 ye = np.array([0, 0.1, 0])
 ze = np.array([0, 0, 0.1])
@@ -113,20 +142,20 @@ v = np.linspace(0, 2 * np.pi, 30)
 xe = np.outer(np.sin(u), np.sin(v))
 ye = np.outer(np.sin(u), np.cos(v))
 ze = np.outer(np.cos(u), np.ones_like(v))
-ax.plot_wireframe(xe, ye, ze, color = 'gray', alpha = 0.5)
+ax.plot_wireframe(xe, ye, ze, color = 'gray', alpha = 0.5)'''
 
     
 #stars
 '''
 random distribution of stars at distance r = 10
 '''
-lat = np.random.uniform(0, 2*np.pi, 500)
+'''lat = np.random.uniform(0, 2*np.pi, 500)
 lon = np.random.uniform(-np.pi/2, np.pi/2, 500)
 xs = np.cos(lat) * np.cos(lon) * 5
 ys = np.cos(lat) * np.sin(lon) * 5
 zs = np.sin(lat) * 5
 
-rand_stars = np.array([xs, ys, zs])#rand_stars = np.transpose(rand_stars)
+rand_stars = np.array([xs, ys, zs])#rand_stars = np.transpose(rand_stars)'''
 
 #ax.scatter(xs, ys, zs, c='r', marker='o') #rand_stars[0], rand_stars[1], rand_stars[2]
 
@@ -142,8 +171,8 @@ rand_stars = np.array([xs, ys, zs])#rand_stars = np.transpose(rand_stars)
 
 #A0 = np.array([0, 0, 0])
 #A1 = np.array([1, 0, 0])
-A0 = originb
-A1 = np.dot(originb, 4.8)
+#A0 = originb
+#A1 = np.dot(originb, 4.8)
 ax.set_xlim(-2, 2)
 ax.set_ylim(-2, 2)
 ax.set_zlim(-2, 2)
