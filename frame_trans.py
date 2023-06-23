@@ -37,17 +37,20 @@ def cel2ecef(time, cel, radec, mode):
 
 
 #ITRS(ECEF)(Geocentric Coordinate Sys) to Local/ENU(East, North, Up)(Topocentric Coordinate Sys)
-def ecef2enu(lat, lon, position, vector):
+def ecef2enu(latitude, longitude, position, vector):
     '''
     Transforms vector in the Earth-centered, Earth-fixed (ECEF) frame to East, North, Up (ENU) local frame
     lat: latitude from star_vector class, declination (DEC) component of <RA, DEC>
     lon: longitude from star_vector class, right ascention (RA) component of <RA, DEC>.
        
     '''
-    T_EL = np.array([[-math.sin(lon),               math.cos(lon),                 0    , position[0]],
+    lat = np.radians(latitude)
+    lon = np.radians(longitude)
+    
+    T_EL = np.array([[-math.sin(lon),                  math.cos(lon),                     0,       position[0]],
                      [-math.cos(lon)*math.sin(lat),   -math.sin(lon)*math.sin(lat), math.cos(lat), position[1]],
                      [ math.cos(lon)*math.cos(lat),    math.sin(lon)*math.cos(lat), math.sin(lat), position[2]],
-                     [        0,                           0,                0,        1   ]])
+                     [        0,                           0,                             0,           1     ]])
     v = np.array([vector[0], vector[1], vector[2], 1])
     l = np.dot(T_EL, v)
     l = np.delete(l, 3)
@@ -105,8 +108,6 @@ def R(angles, local_vector):
     return n
 
 #constannts
-rad = np.pi/180
-deg = 180/np.pi
 gts = 21.295084, -157.811978 # <lat, lon> of ground truth in decimal degrees
 gtc = np.array([-0.86272793, -0.35186237,  0.36317129])
 
@@ -147,13 +148,13 @@ print(pe)'''
 #radec = [323.113683*rad, 0.810916*rad]
 #latlone = cel2ecef(s1.time, s1.cel, s1.radec, 'radec2sph')
 #latlon_e = 18.28441551*rad, 200.99184445*rad #latlon_e shortcut (transfromed vector from cel to ecef)
-test = [18.28441551*rad, 200.99184445*rad] #21.295084*rad, -157.811978*rad
+test = np.array([np.radians(18.28441551), np.radians(200.99184445)]) #21.295084*rad, -157.811978*rad
 est = [18.28441551, 200.99184445]
 #car_e = cel2ecef(s1.time, s1.cel, s1.radec, 'radec2car') #transformed vector from cel to ecef (cartesian)
 #s_e = sph2car(latlon_e[0], latlon_e[1]) 
 s_e = sph2car(test[0], test[1]) 
-init_e = s_e
-org_l = [s_e[0], s_e[1], s_e[2]]
+org_l = np.array([s_e[0], s_e[1], s_e[2]])
+init_e = org_l
 
 
 #vectors
@@ -162,10 +163,10 @@ org_l = [s_e[0], s_e[1], s_e[2]]
 #init_l = ecef2enu(latlon_e[0], latlon_e[1], org_l, org_l)
 #s1.ecef = cel2ecef(s1.time, s1.cel[0], s1.radec, 'car')
 s1.ecef = np.array([-0.89138523, -0.39121153,  0.22887966])
-s1.ecef = [s1.ecef[0], s1.ecef[1], s1.ecef[2]]
+#s1.ecef = [s1.ecef[0], s1.ecef[1], s1.ecef[2]]
 init_l = ecef_to_enu(s1.body[0], test[0], test[1])
 #init_l = ecef_to_enu(s_e, 18.28441551, 200.99184445)
-tilt = [0*rad, 0*rad, 0*rad]
+tilt = np.array([0, 0, 0])
 #tilt = [0.06161487984311333, 0.03387764611236473, -23.6*rad]
 #init_b = R(tilt, init_l)
 init_b = enu2body(tilt, init_l)

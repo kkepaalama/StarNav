@@ -5,6 +5,7 @@
 
 import numpy as np
 import random as ran
+import matplotlib
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.linalg import norm
@@ -28,7 +29,7 @@ sE = f.s_e
 #ax.quiver(oE[0], oE[1], oE[2], sE[0], sE[1], sE[2], color = 'orange')
 
 #local frame
-''' 
+'''
 special orthoganal unit vectors to create a local frame with x, y, and z-axis.
 local frame origin is constrained to the surface of the sphere. The normal vector
 of the local frame is normal to the surface. The gravity vector of the local frame 
@@ -46,29 +47,14 @@ z-axis which is also the normal vector.
 #z_ecef2enu = f.ecef_to_enu(zE, f.est[0], f.est[1])
 
 #s_ecef2enu = f.ecef_to_enu(sE, f.est[0], f.est[1])
+#s_ecef2enu = f.ecef_to_enu(sE, f.est[0], f.est[1])
+o_local = [0, 1, 1]
 
-x_ecef2enu = f.ecef2enu(f.est[0], f.est[1], f.s_e, xE)
-y_ecef2enu = f.ecef2enu(f.est[0], f.est[1], f.s_e, yE)
-z_ecef2enu = f.ecef2enu(f.est[0], f.est[1], f.s_e, zE)
+x_ecef2enu = f.ecef2enu(f.est[0], f.est[1], sE, xE)
+y_ecef2enu = f.ecef2enu(f.est[0], f.est[1], sE, yE)
+z_ecef2enu = f.ecef2enu(f.est[0], f.est[1], sE, zE)
 
-s_ecef2enu = f.ecef_to_enu(sE, f.est[0], f.est[1])
-o_local = f.s_e
-
-
-#local frame axes
-#phi = ran.uniform(-(np.pi/4), (np.pi/4)) #random roll within limits
-#theta = ran.uniform(-(np.pi/4), (np.pi/4)) #random pitch within limits
-#psi = ran.uniform(0, 2*np.pi) #random yaw within limits
-#angle_x = (phi, 0, 0)
-#angle_y = (0, 90, 0)
-#angle_z = (0, 0, psi)
-#Rx = Rot(angle_x)
-#RyL = m.R(angle_y)
-#Rz = Rot(angle_z)
-#yL = np.dot(RyL*0.1, o_local)
-#xL = np.cross(yL, o_local)
-#zL = np.array([o_local[0], o_local[1], o_local[2]])*0.1
-#zb = np.dot(Rz*0.1, o_local)
+#x_ecef2enu = x_ecef2enu/np.linalg.norm(x_ecef2enu)
 
 #rad = np.pi/180
 #tilt = [30*rad, 30*rad, 10*rad]
@@ -83,14 +69,10 @@ ax.quiver(o_local[0], o_local[1], o_local[2], z_ecef2enu[0], z_ecef2enu[1], z_ec
 
 #ax.quiver(o_local[0], o_local[1], o_local[2], s_ecef2enu[0], s_ecef2enu[1], s_ecef2enu[2], color = 'orange') #heading vector
 
-
-
-
 ax.set_xlim([-1, 1])
 ax.set_ylim([-1, 1])
 ax.set_zlim([-1, 1])
 ax.view_init(elev=30, azim=50)
-
 
 #body frame
 '''
@@ -176,5 +158,4 @@ rand_stars = np.array([xs, ys, zs])#rand_stars = np.transpose(rand_stars)'''
 ax.set_xlim(-2, 2)
 ax.set_ylim(-2, 2)
 ax.set_zlim(-2, 2)
-#truncated_cone(A0, A1, 0.1, 1, 'blue')
-plt.show()
+plt.show() 
