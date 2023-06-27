@@ -12,7 +12,7 @@ import astropy.units as u
 
 #data
 from ost_output_papakolea import s1
-from main import Rot, car2sph, sph2car, B, K, q
+import main
 
 
 #ITRS(Cel) to ITRS(ECEF)
@@ -78,6 +78,28 @@ def ecef_to_enu(ecef_vector, latitude, longitude):
     return enu_vector
 
 
+def enu_to_ecef(enu_vector, latitude, longitude):
+    # Convert latitude and longitude to radians
+    phi = np.radians(latitude)
+    lam = np.radians(longitude)
+
+    # Calculate sine and cosine values
+    sin_phi = np.sin(phi)
+    cos_phi = np.cos(phi)
+    sin_lam = np.sin(lam)
+    cos_lam = np.cos(lam)
+
+    # Calculate transformation matrix
+    transformation_matrix = np.array([[-sin_lam, cos_lam, 0],
+                                      [-sin_phi * cos_lam, -sin_phi * sin_lam, cos_phi],
+                                      [cos_phi * cos_lam, cos_phi * sin_lam, sin_phi]])
+    transpose = np.transpose(transformation_matrix)
+
+    # Perform the transformation
+    ecef_vector = np.dot(transpose, enu_vector)
+    return ecef_vector
+
+
 #Local/ENU(East, North, Up)(Topocentric Coordinate Sys) to Rover(Body)
 def enu2body(tilt, local_vector): #where tilt is a 3x1 orientation vector gathered from IMU data and OST output
     x_rot = np.array([[1, 0, 0],
@@ -106,6 +128,31 @@ def R(angles, local_vector):
     Rotation = np.dot(x_rot, np.dot(y_rot, z_rot))
     n = np.dot(Rotation, local_vector)
     return n
+
+def R_AC(latitude, longitude, tilt):
+    phi = np.radians(latitude)
+    lam = np.radians(longitude)
+    sin_phi = np.sin(phi)
+    cos_phi = np.cos(phi)
+    sin_lam = np.sin(lam)
+    cos_lam = np.cos(lam)
+    R_AB = np.array([[-sin_lam, cos_lam, 0],
+                     [-sin_phi * cos_lam, -sin_phi * sin_lam, cos_phi],
+                     [cos_phi * cos_lam, cos_phi * sin_lam, sin_phi]])
+    Rx = np.array([[1, 0, 0],
+                      [0, (np.cos(tilt[0])), -np.sin(tilt[0])],
+                      [0, np.sin(tilt[0]), np.cos(tilt[0])]])
+    Ry = np.array([[np.cos(tilt[1]), 0, np.sin(tilt[1])],
+                      [0, 1, 0],
+                      [-np.sin(tilt[1]), 0, np.cos(tilt[1])]])
+    Rz = np.array([[np.cos(tilt[2]), -np.sin(tilt[2]), 0],
+                      [np.sin(tilt[2]), np.cos(tilt[2]), 0],
+                      [0, 0, 1]])
+    R_BC = np.dot(Rx, np.dot(Ry, Rz))
+    R_AC = np.dot(R_AB, R_BC)
+    
+    return R_AC
+
 
 #constannts
 gts = 21.295084, -157.811978 # <lat, lon> of ground truth in decimal degrees
@@ -148,35 +195,46 @@ print(pe)'''
 #radec = [323.113683*rad, 0.810916*rad]
 #latlone = cel2ecef(s1.time, s1.cel, s1.radec, 'radec2sph')
 #latlon_e = 18.28441551*rad, 200.99184445*rad #latlon_e shortcut (transfromed vector from cel to ecef)
-test = np.array([np.radians(18.28441551), np.radians(200.99184445)]) #21.295084*rad, -157.811978*rad
-est = [18.28441551, 200.99184445]
+#test = np.array([np.radians(18.28441551), np.radians(200.99184445)]) #21.295084*rad, -157.811978*rad
+#est = [18.28441551, 200.99184445]
 #car_e = cel2ecef(s1.time, s1.cel, s1.radec, 'radec2car') #transformed vector from cel to ecef (cartesian)
 #s_e = sph2car(latlon_e[0], latlon_e[1]) 
-s_e = sph2car(test[0], test[1]) 
-org_l = np.array([s_e[0], s_e[1], s_e[2]])
-init_e = org_l
-
+#s_e = sph2car(test[0], test[1]) 
+#org_l = np.array([s_e[0], s_e[1], s_e[2]])
+#init_e = org_l
 
 #vectors
 #init_c = np.array([0, 0, 0]) #initial boresight coordinate in celestial frame in <RA, DEC>
 #init_e = cel2ecef(s1.time, s1.cel, s1.radec, 'sph') #vector from org_e to star (since the vector is normalize it is also the point that intersects shpere with r = 1 in <x, y, z>)'''
 #init_l = ecef2enu(latlon_e[0], latlon_e[1], org_l, org_l)
 #s1.ecef = cel2ecef(s1.time, s1.cel[0], s1.radec, 'car')
-s1.ecef = np.array([-0.89138523, -0.39121153,  0.22887966])
+#s1.ecef = np.array([-0.89138523, -0.39121153,  0.22887966])
 #s1.ecef = [s1.ecef[0], s1.ecef[1], s1.ecef[2]]
-init_l = ecef_to_enu(s1.body[0], test[0], test[1])
+#init_l = ecef_to_enu(s1.body[0], test[0], test[1])
 #init_l = ecef_to_enu(s_e, 18.28441551, 200.99184445)
-tilt = np.array([0, 0, 0])
+#tilt = np.array([0, 0, 0])
 #tilt = [0.06161487984311333, 0.03387764611236473, -23.6*rad]
 #init_b = R(tilt, init_l)
-init_b = enu2body(tilt, init_l)
+#init_b = enu2body(tilt, init_l)
 
 
-R_BE = Rot(init_b, init_e) #rotation matrix from B to E
-Rdotp = np.dot(R_BE, init_e) 
-p_E = (Rdotp + init_l)
-p_e = p_E/np.linalg.norm(p_E)
-pe = car2sph(p_e)
+BS1 = s1.body[0]
+#tilt = [0.06161487984311333, 0.03387764611236473, -0.4118977034706618]
+tilt = [-0.4118977034706618, 0.06161487984311333, 0.03387764611236473]
+#tilt = [0, 0, 0]
+RBL = main.R_inverse(tilt)
+LS1 = np.dot(RBL, BS1)
+
+ES1 = np.array([-0.89138523, -0.39121153,  0.22887966])*2
+
+EL1 = ES1 - LS1
+
+
+#R_BE = Rot(init_b, init_e) #rotation matrix from B to E
+#Rdotp = np.dot(R_BE, init_e)
+#p_E = (Rdotp + init_l)
+#p_e = p_E/np.linalg.norm(p_E)
+pe = main.car2sph(EL1)
 print(pe)
 
 
