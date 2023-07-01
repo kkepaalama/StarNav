@@ -13,7 +13,7 @@ import astropy.units as u
 
 
 #raw image centroid (spherical coordinates)
-def raw_cent(time, radec):
+def cel2ecef_sph(time, radec):
     time = [time]
     t = Time(time, format='iso', scale='utc')
     crs = SkyCoord(ra = radec[0]*u.degree, dec = radec[1]*u.degree, obstime = t, frame = 'icrs', unit = 'deg')
@@ -22,7 +22,7 @@ def raw_cent(time, radec):
     return trs
 
 #raw image centroid (cartesian coordinates)
-def cent(time, radec):
+def cel2ecef_car(time, radec):
     time = [time]
     t = Time(time, format='iso', scale='utc')
     crs = SkyCoord(ra = radec[0]*u.degree, dec = radec[1]*u.degree, obstime = t, frame = 'icrs', unit = 'deg')
@@ -100,15 +100,15 @@ def pos(cam_tilt, n):
     z_rot = np.array([[np.cos(-cam_tilt[2]), -np.sin(-cam_tilt[2]), 0],
                       [np.sin(-cam_tilt[2]), np.cos(-cam_tilt[2]), 0],
                       [0, 0, 1]])
-    R = np.dot(x_rot, np.dot(y_rot, z_rot))
+    R = np.dot(z_rot, np.dot(y_rot, x_rot))
     n_t = np.dot(R, n)
     lat = m.degrees(np.pi/2) - m.degrees(np.arccos(n_t[2]))
     lon = m.degrees(np.arctan2(n_t[1], n_t[0]))
-    #if (lon < 0):
-    #    lon = lon + 360
+    if (lon < 0):
+        lon = lon + 360
     return lat, lon
 
-def R(tilt):
+'''def R(tilt):
     x_rot = np.array([[1, 0, 0],
                       [0, (np.cos(tilt[0])), -np.sin(tilt[0])],
                       [0, np.sin(tilt[0]), np.cos(tilt[0])]])
@@ -119,9 +119,23 @@ def R(tilt):
                       [np.sin(tilt[2]), np.cos(tilt[2]), 0],
                       [0, 0, 1]])
     R = np.dot(z_rot, np.dot(y_rot, x_rot))
-    return R
+    return R'''
 
-def R_inverse(tilt):
+def R(angles):
+    x_rot = np.array([[1, 0, 0],
+                      [0, (np.cos(angles[0])), -np.sin(angles[0])],
+                      [0, np.sin(angles[0]), np.cos(angles[0])]])
+    y_rot = np.array([[np.cos(angles[1]), 0, np.sin(angles[1])],
+                      [0, 1, 0],
+                      [-np.sin(angles[1]), 0, np.cos(angles[1])]])
+    z_rot = np.array([[np.cos(angles[2]), -np.sin(angles[2]), 0],
+                      [np.sin(angles[2]), np.cos(angles[2]), 0],
+                      [0, 0, 1]])
+    n = np.dot(x_rot, np.dot(y_rot, z_rot))
+    return n
+
+
+def R_inverse(tilt):    #this is the correct euler counter rotation DO NOT CHANGE
     x_rot = np.array([[1, 0, 0],
                       [0, (np.cos(-tilt[0])), -np.sin(-tilt[0])],
                       [0, np.sin(-tilt[0]), np.cos(-tilt[0])]])
@@ -131,17 +145,20 @@ def R_inverse(tilt):
     z_rot = np.array([[np.cos(-tilt[2]), -np.sin(-tilt[2]), 0],
                       [np.sin(-tilt[2]), np.cos(-tilt[2]), 0],
                       [0, 0, 1]])
-    R = np.dot(x_rot, np.dot(y_rot, z_rot))
+    R = np.dot(z_rot, np.dot(y_rot, x_rot))
     return R
 
 def Rot(a, b):
     v = np.cross(a, b)
     s = np.linalg.norm(v)
-    c = np.dot(a, b)
-    skew = np.array([[0, -v[2], v[1]],
+    if s == 0:
+        return print('vectors are parallel')
+    else:
+        c = np.dot(a, b)
+        skew = np.array([[0, -v[2], v[1]],
                      [v[2], 0, -v[0]],
                      [-v[1], v[0], 0]])
-    R = np.eye(3) + skew + skew.dot(skew) * ((1 - c)/(s ** 2 ))
+        R = np.eye(3) + skew + skew.dot(skew) * ((1 - c)/(s ** 2 ))
     return R
 
 def sph2car(lat, lon):
@@ -155,3 +172,33 @@ def car2sph(n):
     lat = m.degrees(np.pi/2) - m.degrees(np.arccos(n[2]))
     lon = m.degrees(np.arctan2(n[1], n[0]))
     return (lat, lon)
+
+def q2R(q):
+    # Extract the values from q
+    # where q = (q0, q1, q2, q3) = (q0, q123) where q123 = <qi, qj, qk>
+    q0 = q[3]
+    q1 = q[0]
+    q2 = q[1]
+    q3 = q[2]
+     
+    # First row of the rotation matrix
+    r00 = 2 * (q0 * q0 + q1 * q1) - 1
+    r01 = 2 * (q1 * q2 - q0 * q3)
+    r02 = 2 * (q1 * q3 + q0 * q2)
+     
+    # Second row of the rotation matrix
+    r10 = 2 * (q1 * q2 + q0 * q3)
+    r11 = 2 * (q0 * q0 + q2 * q2) - 1
+    r12 = 2 * (q2 * q3 - q0 * q1)
+     
+    # Third row of the rotation matrix
+    r20 = 2 * (q1 * q3 - q0 * q2)
+    r21 = 2 * (q2 * q3 + q0 * q1)
+    r22 = 2 * (q0 * q0 + q3 * q3) - 1
+     
+    # 3x3 rotation matrix
+    rot_matrix = np.array([[r00, r01, r02],
+                           [r10, r11, r12],
+                           [r20, r21, r22]])
+                            
+    return rot_matrix
