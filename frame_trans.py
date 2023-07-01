@@ -101,7 +101,7 @@ def enu_to_ecef(enu_vector, latitude, longitude):
 
 
 #Local/ENU(East, North, Up)(Topocentric Coordinate Sys) to Rover(Body)
-def enu2body(tilt, local_vector): #where tilt is a 3x1 orientation vector gathered from IMU data and OST output
+def body2enu(tilt, body_vector): #where tilt is a 3x1 orientation vector gathered from IMU data and OST output
     x_rot = np.array([[1, 0, 0],
                       [0, (np.cos(-tilt[0])), -np.sin(-tilt[0])],
                       [0, np.sin(-tilt[0]), np.cos(-tilt[0])]])
@@ -111,11 +111,11 @@ def enu2body(tilt, local_vector): #where tilt is a 3x1 orientation vector gather
     z_rot = np.array([[np.cos(-tilt[2]), -np.sin(-tilt[2]), 0],
                       [np.sin(-tilt[2]), np.cos(-tilt[2]), 0],
                       [0, 0, 1]])
-    R_LB = np.dot(z_rot, np.dot(y_rot, x_rot))
-    b = np.dot(R_LB, local_vector)
+    R_BL = np.dot(z_rot, np.dot(y_rot, x_rot))
+    b = np.dot(R_BL, body_vector)
     return b
 
-def R(angles, local_vector):
+def rotation_matrix(angles, local_vector):
     x_rot = np.array([[1, 0, 0],
                       [0, (np.cos(angles[0])), -np.sin(angles[0])],
                       [0, np.sin(angles[0]), np.cos(angles[0])]])
@@ -129,116 +129,57 @@ def R(angles, local_vector):
     n = np.dot(Rotation, local_vector)
     return n
 
-def R_AC(latitude, longitude, tilt):
-    phi = np.radians(latitude)
-    lam = np.radians(longitude)
-    sin_phi = np.sin(phi)
-    cos_phi = np.cos(phi)
-    sin_lam = np.sin(lam)
-    cos_lam = np.cos(lam)
-    R_AB = np.array([[-sin_lam, cos_lam, 0],
-                     [-sin_phi * cos_lam, -sin_phi * sin_lam, cos_phi],
-                     [cos_phi * cos_lam, cos_phi * sin_lam, sin_phi]])
-    Rx = np.array([[1, 0, 0],
-                      [0, (np.cos(tilt[0])), -np.sin(tilt[0])],
-                      [0, np.sin(tilt[0]), np.cos(tilt[0])]])
-    Ry = np.array([[np.cos(tilt[1]), 0, np.sin(tilt[1])],
-                      [0, 1, 0],
-                      [-np.sin(tilt[1]), 0, np.cos(tilt[1])]])
-    Rz = np.array([[np.cos(tilt[2]), -np.sin(tilt[2]), 0],
-                      [np.sin(tilt[2]), np.cos(tilt[2]), 0],
-                      [0, 0, 1]])
-    R_BC = np.dot(Rx, np.dot(Ry, Rz))
-    R_AC = np.dot(R_AB, R_BC)
-    
-    return R_AC
-
 
 #constannts
 gts = 21.295084, -157.811978 # <lat, lon> of ground truth in decimal degrees
 gtc = np.array([-0.86272793, -0.35186237,  0.36317129])
 
+E_EoS0 = cel2ecef(s1.time, s1.cel[0], s1.radec, 'car')
+E_EoS1 = cel2ecef(s1.time, s1.cel[1], s1.radec, 'car')
+E_EoS2 = cel2ecef(s1.time, s1.cel[2], s1.radec, 'car')
+E_EoS3 = cel2ecef(s1.time, s1.cel[3], s1.radec, 'car')
+E_EoS4 = cel2ecef(s1.time, s1.cel[4], s1.radec, 'car')
+E_EoS5 = cel2ecef(s1.time, s1.cel[5], s1.radec, 'car')
+E_EoS6 = cel2ecef(s1.time, s1.cel[6], s1.radec, 'car')
+E_EoS7 = cel2ecef(s1.time, s1.cel[7], s1.radec, 'car')
+E_EoS8 = cel2ecef(s1.time, s1.cel[8], s1.radec, 'car')
+E_EoS9 = cel2ecef(s1.time, s1.cel[9], s1.radec, 'car')
 
-#ideal conditions
-'''lat, lon = 21.295084*rad, -157.811978*rad    #initial position
-#lat, lon = 21*rad, -157*rad        #initial position
-s_e = sph2car(lat, lon)         #conversion from spherical to cartesian
-org_e = [0, 0, 0]       #origin of E frame in terms of E
-org_l = [s_e[0], s_e[1], s_e[2]]        #origin of L frame
-org_b = org_l       #origin of L and B frame coincide
-init_e = s_e        #initial position in cartesian
-init_l = ecef2enu(lat, lon, s_e, s_e)       #initial position for L frame
-
-
-tilt = [0.1*rad, 0.0*rad, 0*rad]      #tilt
-init_b = enu2body(tilt, init_l)         #initial position of B frame origin
-R_BE = Rot(init_b, init_e)      #homogeneous transformation
-Rdotp = np.dot(R_BE, init_e)
-p_E = Rdotp + init_l
-p_e = p_E/np.linalg.norm(p_E)
-pe = car2sph(p_e)       #final position estimate
-print(pe)'''
-
-
-'''for i in np.linspace(0, np.pi/2, num=11):
-    tilt = [0, i, 0]    
-    init_b = enu2body(tilt, init_l)
-    R_BE = Rot(init_b, init_e)
-    Rdotp = np.dot(R_BE, init_e)
-    p_E = Rdotp + init_l
-    p_e = p_E/np.linalg.norm(p_E)
-    pe = car2sph(p_e)
-    print(pe)'''
-
-
-#origins-points
-#radec = [323.113683*rad, 0.810916*rad]
-#latlone = cel2ecef(s1.time, s1.cel, s1.radec, 'radec2sph')
-#latlon_e = 18.28441551*rad, 200.99184445*rad #latlon_e shortcut (transfromed vector from cel to ecef)
-#test = np.array([np.radians(18.28441551), np.radians(200.99184445)]) #21.295084*rad, -157.811978*rad
-#est = [18.28441551, 200.99184445]
-#car_e = cel2ecef(s1.time, s1.cel, s1.radec, 'radec2car') #transformed vector from cel to ecef (cartesian)
-#s_e = sph2car(latlon_e[0], latlon_e[1]) 
-#s_e = sph2car(test[0], test[1]) 
-#org_l = np.array([s_e[0], s_e[1], s_e[2]])
-#init_e = org_l
-
-#vectors
-#init_c = np.array([0, 0, 0]) #initial boresight coordinate in celestial frame in <RA, DEC>
-#init_e = cel2ecef(s1.time, s1.cel, s1.radec, 'sph') #vector from org_e to star (since the vector is normalize it is also the point that intersects shpere with r = 1 in <x, y, z>)'''
-#init_l = ecef2enu(latlon_e[0], latlon_e[1], org_l, org_l)
-#s1.ecef = cel2ecef(s1.time, s1.cel[0], s1.radec, 'car')
-#s1.ecef = np.array([-0.89138523, -0.39121153,  0.22887966])
-#s1.ecef = [s1.ecef[0], s1.ecef[1], s1.ecef[2]]
-#init_l = ecef_to_enu(s1.body[0], test[0], test[1])
-#init_l = ecef_to_enu(s_e, 18.28441551, 200.99184445)
-#tilt = np.array([0, 0, 0])
-#tilt = [0.06161487984311333, 0.03387764611236473, -23.6*rad]
-#init_b = R(tilt, init_l)
-#init_b = enu2body(tilt, init_l)
-
-
-BS1 = s1.body[0]
-#tilt = [0.06161487984311333, 0.03387764611236473, -0.4118977034706618]
 tilt = [-0.4118977034706618, 0.06161487984311333, 0.03387764611236473]
-#tilt = [0, 0, 0]
-RBL = main.R_inverse(tilt)
-LS1 = np.dot(RBL, BS1)
 
-ES1 = np.array([-0.89138523, -0.39121153,  0.22887966])*2
+B_BoS0 = body2enu(tilt, s1.body[0])
+B_BoS1 = body2enu(tilt, s1.body[1])
+B_BoS2 = body2enu(tilt, s1.body[2])
+B_BoS3 = body2enu(tilt, s1.body[3])
+B_BoS4 = body2enu(tilt, s1.body[4])
+B_BoS5 = body2enu(tilt, s1.body[5])
+B_BoS6 = body2enu(tilt, s1.body[6])
+B_BoS7 = body2enu(tilt, s1.body[7])
+B_BoS8 = body2enu(tilt, s1.body[8])
+B_BoS9 = body2enu(tilt, s1.body[9])
 
-EL1 = ES1 - LS1
+B0 = main.B(B_BoS0, E_EoS0, s1.wt[0])
+B1 = main.B(B_BoS1, E_EoS1, s1.wt[1])
+B2 = main.B(B_BoS2, E_EoS2, s1.wt[2])
+B3 = main.B(B_BoS3, E_EoS3, s1.wt[3])
+B4 = main.B(B_BoS4, E_EoS4, s1.wt[4])
+B5 = main.B(B_BoS5, E_EoS5, s1.wt[5])
+B6 = main.B(B_BoS6, E_EoS6, s1.wt[6])
+B7 = main.B(B_BoS7, E_EoS7, s1.wt[7])
+B8 = main.B(B_BoS8, E_EoS8, s1.wt[8])
+B9 = main.B(B_BoS9, E_EoS9, s1.wt[9])
 
+B = B1 + B2 + B3 + B4 + B5 + B6 + B7 + B8 + B9
+K = main.K(B)
+q = main.q(K)
+E_R_B = main.q2R(q)
 
-#R_BE = Rot(init_b, init_e) #rotation matrix from B to E
-#Rdotp = np.dot(R_BE, init_e)
-#p_E = (Rdotp + init_l)
-#p_e = p_E/np.linalg.norm(p_E)
-pe = main.car2sph(EL1)
-print(pe)
+E_p_B = E_EoS4 - np.dot(E_R_B, B_BoS4).reshape(3, 1)
+
+global_position = main.car2sph(E_p_B)
+print(global_position)
 
 
 coords_1 = (gts[0], gts[1])
-coords_2 = (pe[0], pe[1])
+coords_2 = (global_position[0], global_position[1])
 print(geopy.distance.geodesic(coords_1, coords_2).miles, 'miles    ', geopy.distance.geodesic(coords_1, coords_2).km, 'km')
-
