@@ -1,8 +1,3 @@
-#/usr/bin/python
-
-### Plots position estimates relative to "current location" or location that the images were taken from
-### Current plot is set for Hawaii
-
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 import numpy as np

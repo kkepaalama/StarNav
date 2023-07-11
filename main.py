@@ -3,12 +3,13 @@
 ### This file contains all the required functions for the global position estimate algorithm
 
 import numpy as np
-import math as m
+import math
 
 from astropy.time import Time
 from astropy.coordinates import SkyCoord
-#from astropy.coordinates import ITRS
-#from astropy.coordinates import ICRS
+from astropy.coordinates import ITRS
+from astropy.coordinates import ICRS
+from astropy.coordinates import GCRS
 import astropy.units as u
 
 
@@ -31,6 +32,12 @@ def cel2ecef(time, cel, radec, mode):
         trs = crs.itrs
         e = np.array([trs.x, trs.y, trs.z])
         return e
+    if mode == 'GCRS':
+        gcrs = GCRS(x = cel[0]*u.m, y = cel[1]*u.m, z = cel[2]*u.m, obstime = t, representation_type= 'cartesian')
+        itrs = gcrs.transform_to(ITRS(obstime = t))
+        e = np.array([itrs.x, itrs.y, itrs.z])
+        return e
+        
     
 ###Davenport q-Method
 #B matrix
@@ -93,8 +100,8 @@ def pos(cam_tilt, n):
                       [0, 0, 1]])
     R = np.dot(z_rot, np.dot(y_rot, x_rot))
     n_t = np.dot(R, n)
-    lat = m.degrees(np.pi/2) - m.degrees(np.arccos(n_t[2]))
-    lon = m.degrees(np.arctan2(n_t[1], n_t[0]))
+    lat = math.degrees(np.pi/2) - math.degrees(np.arccos(n_t[2]))
+    lon = math.degrees(np.arctan2(n_t[1], n_t[0]))
     if (lon < 0):
         lon = lon + 360
     return lat, lon
@@ -153,29 +160,33 @@ def rotation_matrix(tilt, local_vector):
     n = np.dot(Rotation, local_vector)
     return n
 
-#def Rot(a, b):
-#    v = np.cross(a, b)
-#    s = np.linalg.norm(v)
-#    if s == 0:
-#       return print('vectors are parallel')
-#    else:
-#        c = np.dot(a, b)
-#        skew = np.array([[0, -v[2], v[1]],
-#                     [v[2], 0, -v[0]],
-#                     [-v[1], v[0], 0]])
-#        R = np.eye(3) + skew + skew.dot(skew) * ((1 - c)/(s ** 2 ))
-#    return R
+def Rot(a, b):
+    v = np.cross(a, b)
+    s = np.linalg.norm(v)
+    if s == 0:
+       return print('vectors are parallel')
+    else:
+        c = np.dot(a, b)
+        skew = np.array([[0, -v[2], v[1]],
+                     [v[2], 0, -v[0]],
+                     [-v[1], v[0], 0]])
+        R = np.eye(3) + skew + skew.dot(skew) * ((1 - c)/(s ** 2 ))
+    return R
 
-def sph2car(lat, lon):
-    x = np.cos(lat)*np.cos(lon)
-    y = np.cos(lat)*np.sin(lon)
-    z = np.sin(lat)
+def sph2car(latitude, longitude, radius):
+    lat = np.radians(latitude)
+    lon = np.radians(longitude)
+    R = radius #m
+    x = R*np.cos(lat)*np.cos(lon)
+    y = R*np.cos(lat)*np.sin(lon)
+    z = R*np.sin(lat)
     vec = np.array([x, y, z])
     return vec
 
+
 def car2sph(n):
-    lat = m.degrees(np.pi/2) - m.degrees(np.arccos(n[2]))
-    lon = m.degrees(np.arctan2(n[1], n[0]))
+    lat = math.degrees(np.pi/2) - math.degrees(np.arccos(n[2]))
+    lon = math.degrees(np.arctan2(n[1], n[0]))
     return (lat, lon)
 
 def q2R(q):
@@ -219,9 +230,9 @@ def ecef2enu(latitude, longitude, position, vector):
     lat = np.radians(latitude)
     lon = np.radians(longitude)
     
-    T_EL = np.array([[-m.sin(lon),                  m.cos(lon),                     0,       position[0]],
-                     [-m.cos(lon)*m.sin(lat),   -m.sin(lon)*m.sin(lat), m.cos(lat), position[1]],
-                     [ m.cos(lon)*m.cos(lat),    m.sin(lon)*m.cos(lat), m.sin(lat), position[2]],
+    T_EL = np.array([[-math.sin(lon),                  math.cos(lon),                     0,       position[0]],
+                     [-math.cos(lon)*math.sin(lat),   -math.sin(lon)*math.sin(lat), math.cos(lat), position[1]],
+                     [ math.cos(lon)*math.cos(lat),    math.sin(lon)*math.cos(lat), math.sin(lat), position[2]],
                      [        0,                           0,                             0,           1     ]])
     v = np.array([vector[0], vector[1], vector[2], 1])
     l = np.dot(T_EL, v)
@@ -275,14 +286,15 @@ def enu_to_ecef(enu_vector, latitude, longitude):
 #Local/ENU(East, North, Up)(Topocentric Coordinate Sys) to Rover(Body)
 def body2enu(tilt, body_vector): #where tilt is a 3x1 tilt vector gathered from IMU data and OST output
     x_rot = np.array([[1, 0, 0],
-                      [0, (np.cos(-tilt[0])), -np.sin(-tilt[0])],
-                      [0, np.sin(-tilt[0]), np.cos(-tilt[0])]])
-    y_rot = np.array([[np.cos(-tilt[1]), 0, np.sin(-tilt[1])],
+                      [0, (np.cos(tilt[0])), -np.sin(tilt[0])],
+                      [0, np.sin(tilt[0]), np.cos(tilt[0])]])
+    y_rot = np.array([[np.cos(tilt[1]), 0, np.sin(tilt[1])],
                       [0, 1, 0],
-                      [-np.sin(-tilt[1]), 0, np.cos(-tilt[1])]])
-    z_rot = np.array([[np.cos(-tilt[2]), -np.sin(-tilt[2]), 0],
-                      [np.sin(-tilt[2]), np.cos(-tilt[2]), 0],
+                      [-np.sin(tilt[1]), 0, np.cos(tilt[1])]])
+    z_rot = np.array([[np.cos(tilt[2]), -np.sin(tilt[2]), 0],
+                      [np.sin(tilt[2]), np.cos(tilt[2]), 0],
                       [0, 0, 1]])
-    R_BL = np.dot(z_rot, np.dot(y_rot, x_rot))
+    R_BL = np.dot(x_rot, np.dot(y_rot, z_rot))
     b = np.dot(R_BL, body_vector)
     return b
+

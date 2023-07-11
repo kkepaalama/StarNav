@@ -44,13 +44,16 @@ w = zE
 
 u, v, w = np.dot(R, u), np.dot(R, v), np.dot(R, w)'''
 
-E_EoS0 = f.E_EoS0
-E_EoS1 = f.E_EoS1
-E_EoS2 = f.E_EoS2
+#E_EoS0 = np.dot(f.ERG, f.E_EoS0)
+E_EoS0= [f.E_EoS0[0], f.E_EoS0[1], f.E_EoS0[2]]
+B_BoS0 = np.dot(f.ERG, f.B_BoS0)
+B_BoS0= [B_BoS0[0], B_BoS0[1], B_BoS0[2]]
+#gtc = np.dot(f.ERG, f.gtc)
+gtc = [f.gtc[0], f.gtc[1], f.gtc[2]]
 
 ax.quiver(oE[0], oE[1], oE[2], E_EoS0[0], E_EoS0[1], E_EoS0[2], color = 'm')
-ax.quiver(oE[0], oE[1], oE[2], E_EoS1[0], E_EoS1[1], E_EoS1[2], color = 'm')
-ax.quiver(oE[0], oE[1], oE[2], E_EoS2[0], E_EoS2[1], E_EoS2[2], color = 'm')
+ax.quiver(oE[0], oE[1], oE[2], B_BoS0[0], B_BoS0[1], B_BoS0[2], color = 'c')
+ax.quiver(oE[0], oE[1], oE[2], gtc[0], gtc[1], gtc[2], color = 'pink')
 #ax.quiver(zE[0], zE[1], zE[2], w[0], w[1], w[2], color = 'y')
 
 ax.set_xlim([-1, 1])
