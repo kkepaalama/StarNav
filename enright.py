@@ -57,6 +57,7 @@ tilt = [0.06161487984311333, 0.03387764611236473, -0.4118977034706618]
 roll = 0.06161487984311333
 pitch = 0.03387764611236473
 heading = -0.4118977034706618 #east of north
+psi = np.radians(0) #hours ahead of GMST/GAST multiplied by 15 degrees
 
 idx = [1, 2, 0] #changes vectors from camera to body
 
@@ -71,6 +72,7 @@ B7 = m.B(s1.body[7][idx], E_EoS7, s1.wt[7])
 B8 = m.B(s1.body[8][idx], E_EoS8, s1.wt[8])
 B9 = m.B(s1.body[9][idx], E_EoS9, s1.wt[9])
 
+bs = np.array([-0.88649317, -0.34014807, 0.3137342])
 
 '''B0 = m.B(s1.body[0][idx], s1.cel[0], s1.wt[0])
 B1 = m.B(s1.body[1][idx], s1.cel[1], s1.wt[1])
@@ -89,7 +91,7 @@ q = m.q(K)
 rotation_matrix = m.q2R(q) #body to inertial or s to i
 transpose = np.transpose(rotation_matrix)
 
-phi = np.pi/2 - np.arccos(rotation_matrix[2, 2])
+'''phi = np.pi/2 - np.arccos(rotation_matrix[2, 2])
 lam = np.arctan2(rotation_matrix[1, 2]/np.cos(phi), rotation_matrix[0, 2]/np.cos(phi))
 alpha = np.pi - np.arctan2(rotation_matrix[2, 1]/np.cos(phi), -rotation_matrix[2, 0]/np.cos(phi))
 
@@ -105,15 +107,28 @@ Cmt = Ry(np.pi/2 - phi)
 Ctv = Rz(np.pi - alpha)
 
 
-#Cfv = np.dot(np.transpose(Cif), np.dot(Cis, Csv))
+Cfv1 = np.dot(np.transpose(Cif), np.dot(Cis, np.transpose(Cvs)))
 Cfv = np.dot(Cmf, np.dot(Cmt, Ctv)) #Cfv_RHS = np.dot(Rz(lam), np.dot(Ry(np.pi/2 - phi), Rz(np.pi - alpha)))
+'''
 
-a = np.dot(Cfv, s1.body[0][idx].reshape(3,1))
+cRr = np.dot(Ry(np.pi/2), Rx(np.pi/2)) #rotation to align rover to camera frame
+R = np.dot(Rz(pitch), Ry(roll))
+iRc = rotation_matrix
+fRi = Rz(psi)
+fRr = np.dot(fRi, np.dot(iRc, R))
+
+'''a = np.dot(Cfv, s1.body[0][idx].reshape(3,1))
 b = np.dot(Cfv, s1.body[1][idx].reshape(3,1))
 c = np.dot(Cfv, s1.body[2][idx].reshape(3,1))
 d = np.dot(Cfv, s1.body[3][idx].reshape(3,1))
-e = np.dot(Cfv, s1.body[4][idx].reshape(3,1))
-bs = np.dot(Cfv, bs)
+e = np.dot(Cfv, s1.body[4][idx].reshape(3,1))'''
+
+a = np.dot(fRr, s1.body[0][idx].reshape(3,1))
+b = np.dot(fRr, s1.body[1][idx].reshape(3,1))
+c = np.dot(fRr, s1.body[2][idx].reshape(3,1))
+d = np.dot(fRr, s1.body[3][idx].reshape(3,1))
+e = np.dot(fRr, s1.body[4][idx].reshape(3,1))
+bs = np.dot(fRr, bs.reshape(3,1))
 
 a = m.car2sph(a)
 b = m.car2sph(b)
@@ -130,7 +145,7 @@ d = (d[0], d[1])
 d = (d[0], d[1])
 bs = (bs[0], bs[1])
 
-'''print(a)
+print(a)
 print(geopy.distance.geodesic(ground_truth, a).miles, 'miles    ', geopy.distance.geodesic(ground_truth, a).km, 'km')
 print(b)
 print(geopy.distance.geodesic(ground_truth, b).miles, 'miles    ', geopy.distance.geodesic(ground_truth, b).km, 'km')
@@ -141,4 +156,4 @@ print(geopy.distance.geodesic(ground_truth, d).miles, 'miles    ', geopy.distanc
 print(e)
 print(geopy.distance.geodesic(ground_truth, e).miles, 'miles    ', geopy.distance.geodesic(ground_truth, e).km, 'km')
 print(bs)
-print(geopy.distance.geodesic(ground_truth, bs).miles, 'miles    ', geopy.distance.geodesic(ground_truth, bs).km, 'km')'''
+print(geopy.distance.geodesic(ground_truth, bs).miles, 'miles    ', geopy.distance.geodesic(ground_truth, bs).km, 'km')

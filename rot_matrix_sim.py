@@ -4,7 +4,7 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
-from main import Rot, R, R_inverse
+import main
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
@@ -40,7 +40,7 @@ ax.quiver(origo[0],origo[1],origo[2], zL[0], zL[1], zL[2], color="b", alpha = 0.
 # Body frame: this frame rotates
 rad = np.pi/180
 tilt = [30*rad, 10*rad, 10*rad]
-R = R(tilt)
+R = main.Rotation_XYZ(tilt)
 x_B, y_B, z_B = [1, 0, 0], [0, 1, 0], [0, 0, 1]
 Rx, Ry, Rz = np.dot(R, x_B), np.dot(R, y_B), np.dot(R, z_B)
 ax.quiver(origo[0],origo[1],origo[2], Rx[0], Rx[1], Rx[2], color="c")#,normalize=True)
@@ -53,7 +53,7 @@ ax.quiver(origo[0],origo[1],origo[2], Rz[0], Rz[1], Rz[2], color="m")#,normalize
 rad = np.pi/180
 #tilt = [30*rad, 10*rad, 10*rad]
 
-R_in = R_inverse(tilt)
+R_in = main.Rotation_ZYX(tilt)
 
 xB, yB, zB = np.dot(R_in, Rx)*1.2, np.dot(R_in, Ry)*1.2, np.dot(R_in, Rz)*1.2
 

@@ -3,7 +3,7 @@
 ### This file contains all the required functions for the global position estimate algorithm
 
 import numpy as np
-import math
+import math as m
 
 from astropy.time import Time
 from astropy.coordinates import SkyCoord
@@ -20,8 +20,8 @@ def cel2ecef(time, cel, radec, mode):
     if mode == 'radec2car':
         crs = SkyCoord(ra = radec[0]*u.degree, dec = radec[1]*u.degree, obstime = t, frame = 'icrs', unit = 'deg')
         trs = crs.itrs
-        e = np.array([trs.x, trs.y, trs.z])
-        return e
+        radec2car = np.array([trs.x, trs.y, trs.z])
+        return radec2car
     if mode == 'radec2sph':
         crs = SkyCoord(ra = radec[0]*u.degree, dec = radec[1]*u.degree, obstime = t, frame = 'icrs', unit = 'deg')
         trs = crs.itrs
@@ -30,14 +30,20 @@ def cel2ecef(time, cel, radec, mode):
     if mode == 'car':
         crs = SkyCoord(x = cel[0], y = cel[1], z = cel[2], obstime = t, frame = 'icrs', representation_type = 'cartesian')
         trs = crs.itrs
-        e = np.array([trs.x, trs.y, trs.z])
-        return e
-    if mode == 'GCRS':
-        gcrs = GCRS(x = cel[0]*u.m, y = cel[1]*u.m, z = cel[2]*u.m, obstime = t, representation_type= 'cartesian')
-        itrs = gcrs.transform_to(ITRS(obstime = t))
-        e = np.array([itrs.x, itrs.y, itrs.z])
-        return e
-        
+        car = np.array([trs.x, trs.y, trs.z])
+        return car
+    if mode == 'sph':
+        crs = SkyCoord(x = cel[0], y = cel[1], z = cel[2], obstime = t, frame = 'icrs', representation_type = 'cartesian')
+        trs = crs.itrs
+        trs.representation_type = 'spherical'
+        return trs
+    
+def eci2ecef(time, eci_vector):
+    time = [time]
+    t = Time(time, format = 'iso', scale ='utc')
+    gcrs = GCRS(x = eci_vector[0], y = eci_vector[1], z = eci_vector[2], obstime = t, representation_type = 'cartesian')
+    itrs = gcrs.transform_to(ITRS(obstime = t))
+    return itrs
     
 ###Davenport q-Method
 #B matrix
@@ -100,8 +106,8 @@ def pos(cam_tilt, n):
                       [0, 0, 1]])
     R = np.dot(z_rot, np.dot(y_rot, x_rot))
     n_t = np.dot(R, n)
-    lat = math.degrees(np.pi/2) - math.degrees(np.arccos(n_t[2]))
-    lon = math.degrees(np.arctan2(n_t[1], n_t[0]))
+    lat = m.degrees(np.pi/2) - m.degrees(np.arccos(n_t[2]))
+    lon = m.degrees(np.arctan2(n_t[1], n_t[0]))
     if (lon < 0):
         lon = lon + 360
     return lat, lon
@@ -173,20 +179,16 @@ def Rot(a, b):
         R = np.eye(3) + skew + skew.dot(skew) * ((1 - c)/(s ** 2 ))
     return R
 
-def sph2car(latitude, longitude, radius):
-    lat = np.radians(latitude)
-    lon = np.radians(longitude)
-    R = radius #m
-    x = R*np.cos(lat)*np.cos(lon)
-    y = R*np.cos(lat)*np.sin(lon)
-    z = R*np.sin(lat)
+def sph2car(lat, lon):
+    x = np.cos(lat)*np.cos(lon)
+    y = np.cos(lat)*np.sin(lon)
+    z = np.sin(lat)
     vec = np.array([x, y, z])
     return vec
 
-
 def car2sph(n):
-    lat = math.degrees(np.pi/2) - math.degrees(np.arccos(n[2]))
-    lon = math.degrees(np.arctan2(n[1], n[0]))
+    lat = m.degrees(np.pi/2) - m.degrees(np.arccos(n[2]))
+    lon = m.degrees(np.arctan2(n[1], n[0]))
     return (lat, lon)
 
 def q2R(q):
@@ -230,9 +232,9 @@ def ecef2enu(latitude, longitude, position, vector):
     lat = np.radians(latitude)
     lon = np.radians(longitude)
     
-    T_EL = np.array([[-math.sin(lon),                  math.cos(lon),                     0,       position[0]],
-                     [-math.cos(lon)*math.sin(lat),   -math.sin(lon)*math.sin(lat), math.cos(lat), position[1]],
-                     [ math.cos(lon)*math.cos(lat),    math.sin(lon)*math.cos(lat), math.sin(lat), position[2]],
+    T_EL = np.array([[-m.sin(lon),                  m.cos(lon),                     0,       position[0]],
+                     [-m.cos(lon)*m.sin(lat),   -m.sin(lon)*m.sin(lat), m.cos(lat), position[1]],
+                     [ m.cos(lon)*m.cos(lat),    m.sin(lon)*m.cos(lat), m.sin(lat), position[2]],
                      [        0,                           0,                             0,           1     ]])
     v = np.array([vector[0], vector[1], vector[2], 1])
     l = np.dot(T_EL, v)
@@ -286,15 +288,53 @@ def enu_to_ecef(enu_vector, latitude, longitude):
 #Local/ENU(East, North, Up)(Topocentric Coordinate Sys) to Rover(Body)
 def body2enu(tilt, body_vector): #where tilt is a 3x1 tilt vector gathered from IMU data and OST output
     x_rot = np.array([[1, 0, 0],
-                      [0, (np.cos(tilt[0])), -np.sin(tilt[0])],
-                      [0, np.sin(tilt[0]), np.cos(tilt[0])]])
-    y_rot = np.array([[np.cos(tilt[1]), 0, np.sin(tilt[1])],
+                      [0, (np.cos(-tilt[0])), -np.sin(-tilt[0])],
+                      [0, np.sin(-tilt[0]), np.cos(-tilt[0])]])
+    y_rot = np.array([[np.cos(-tilt[1]), 0, np.sin(-tilt[1])],
                       [0, 1, 0],
-                      [-np.sin(tilt[1]), 0, np.cos(tilt[1])]])
-    z_rot = np.array([[np.cos(tilt[2]), -np.sin(tilt[2]), 0],
-                      [np.sin(tilt[2]), np.cos(tilt[2]), 0],
+                      [-np.sin(-tilt[1]), 0, np.cos(-tilt[1])]])
+    z_rot = np.array([[np.cos(-tilt[2]), -np.sin(-tilt[2]), 0],
+                      [np.sin(-tilt[2]), np.cos(-tilt[2]), 0],
                       [0, 0, 1]])
-    R_BL = np.dot(x_rot, np.dot(y_rot, z_rot))
+    R_BL = np.dot(z_rot, np.dot(y_rot, x_rot))
     b = np.dot(R_BL, body_vector)
     return b
 
+
+def lla2ecef(latitude, longitude, altitude):
+    # Constants for WGS84 ellipsoid
+    a = 6378137.0  # Semi-major axis
+    b = 6356752.314245  # Semi-minor axis
+    e_sq = (a**2 - b**2) / a**2  # Eccentricity squared
+
+    # Convert latitude and longitude to radians
+    lat_rad = m.radians(latitude)
+    lon_rad = m.radians(longitude)
+
+    # Calculate radius of curvature in the prime vertical
+    N = a / m.sqrt(1 - e_sq * m.sin(lat_rad)**2)
+
+    # Calculate ECEF coordinates
+    x = (N + altitude) * m.cos(lat_rad) * m.cos(lon_rad)
+    y = (N + altitude) * m.cos(lat_rad) * m.sin(lon_rad)
+    z = ((b**2 / a**2) * N + altitude) * m.sin(lat_rad)
+
+    return x, y, z
+
+def Rx(theta):
+    rx = np.array([[1, 0, 0],
+                   [0, (np.cos(theta)), -np.sin(theta)],
+                   [0, np.sin(theta), np.cos(theta)]])
+    return rx
+    
+def Ry(theta):
+    ry = np.array([[np.cos(theta), 0, np.sin(theta)],
+                   [0, 1, 0],
+                   [-np.sin(theta), 0, np.cos(theta)]])
+    return ry
+
+def Rz(theta):
+    rz = np.array([[np.cos(theta), -np.sin(theta), 0],
+                   [np.sin(theta), np.cos(theta), 0],
+                   [0, 0, 1]])
+    return rz
