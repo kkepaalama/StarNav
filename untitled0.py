@@ -27,10 +27,10 @@ ax.view_init(30, 45)
 
 #Local frame: this frame is fixed
 x, y, z = [1, 0, 0], [0, 1, 0], [0, 0, 1]
-ax.quiver(o[0],o[1],o[2], x[0], x[1], x[2],  color="r", alpha = 0.5)#,normalize=True) #x-axis
-ax.quiver(o[0],o[1],o[2], y[0], y[1], y[2], color="g", alpha = 0.5)#,normalize=True) #y-axis
-ax.quiver(o[0],o[1],o[2], z[0], z[1], z[2], color="b", alpha = 0.5)#,normalize=True) #z-axis or normal vector
-#ax.quiver(o[0],o[1],o[2], 0, 0, -1, color="orange", alpha = 0.5)#,normalize=True) #gravity vector 
+ax.quiver(o[0],o[1],o[2], x[0], x[1], x[2],  color="r", alpha = 0.5) #x-axis
+ax.quiver(o[0],o[1],o[2], y[0], y[1], y[2], color="g", alpha = 0.5) #y-axis
+ax.quiver(o[0],o[1],o[2], z[0], z[1], z[2], color="b", alpha = 0.5) #z-axis or normal vector
+#ax.quiver(o[0],o[1],o[2], 0, 0, -1, color="orange", alpha = 0.5) #gravity vector 
 
 # Body frame: this frame rotates
 theta = np.radians(30)
@@ -42,23 +42,24 @@ rz = main.Rz(psi)
 ryx = np.dot(ry, rx)
 rxyz = np.dot(rz, np.dot(ry, rx))
 zp = np.dot(rxyz, z) #rotated vector
-ax.quiver(o[0],o[1],o[2], zp[0], zp[1], zp[2], color="m")#,normalize=True)
+ax.quiver(o[0],o[1],o[2], zp[0], zp[1], zp[2], color="m")
 
 
 zpp = z + zp #resultant vector
-ax.quiver(o[0],o[1],o[2], zpp[0], zpp[1], zpp[2], color="c")#,normalize=True) #resultant vector with origin at [0, 0, 0]
-#ax.quiver(z[0],z[1], z[2], zp[0], zp[1], zp[2], color="y")#,normalize=True) #translated vector zp with origin at end of z
+ax.quiver(o[0],o[1],o[2], zpp[0], zpp[1], zpp[2], color="c") #resultant vector with origin at [0, 0, 0]
+ax.quiver(z[0],z[1], z[2], zp[0], zp[1], zp[2], color="y") #translated vector zp with origin at end of z
 
-# axis label placement
-ax.text(0.1, 0.0, -0.2, r'$0$')
-ax.text(1.3, 0, 0, r'$x$')
-ax.text(0, 1.3, 0, r'$y$')
-ax.text(0, 0, 1.3, r'$z$')
-
-# Set an equal aspect ratio
-ax.set_aspect('auto')
+r_yx = np.dot(main.Ry(-phi), main.Rx(-theta))
+z1p = np.dot(np.transpose(ryx), z)
+ax.quiver(o[0],o[1],o[2], z1p[0], z1p[1], z1p[2], color="orange")
 
 zpp_norm = zpp/np.linalg.norm(zpp)
+
+z2p = z1p + zp
+z2p = z2p/np.linalg.norm(z2p)
+#ax.quiver(zpp_norm[0], zpp_norm[1], zpp_norm[2], z2p[0], z2p[1], z2p[2], color="pink") #test
+ax.quiver(zp[0], zp[1], zp[2], z2p[0], z2p[1], z2p[2], color="pink") #test 
+
 Rxyz = np.dot(main.Rz(psi/2), np.dot(main.Ry(phi/2), main.Rx(theta/2)))
 z1 = np.dot(np.transpose(Rxyz), zpp_norm)
 z1 = z1/np.linalg.norm(z1)
@@ -74,4 +75,13 @@ coords_1 = (z_sph[0], z_sph[1])
 coords_2 = (z1_sph[0], z1_sph[1])
 print(geopy.distance.geodesic(coords_1, coords_2).miles, 'miles    ', geopy.distance.geodesic(coords_1, coords_2).km, 'km')
 
+
+# axis label placement
+ax.text(0.1, 0.0, -0.2, r'$0$')
+ax.text(1.3, 0, 0, r'$x$')
+ax.text(0, 1.3, 0, r'$y$')
+ax.text(0, 0, 1.3, r'$z$')
+
+# Set an equal aspect ratio
+ax.set_aspect('auto')
 plt.show()

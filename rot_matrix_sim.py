@@ -4,7 +4,7 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
-import main
+import main as m
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
@@ -31,16 +31,19 @@ origo= np.array([0,0,0])
 ax.view_init(30, 45)
 
 #Local frame: this frame is fixed
-xL, yL, zL = [1.2, 0, 0], [0, 1.2, 0], [0, 0, 1.2]
+xL, yL, zL = [1, 0, 0], [0, 1, 0], [0, 0, 1]
 ax.quiver(origo[0],origo[1],origo[2], xL[0], xL[1], xL[2],  color="r", alpha = 0.5)#,normalize=True) #x-axis
 ax.quiver(origo[0],origo[1],origo[2], yL[0], yL[1], yL[2], color="g", alpha = 0.5)#,normalize=True) #y-axis
 ax.quiver(origo[0],origo[1],origo[2], zL[0], zL[1], zL[2], color="b", alpha = 0.5)#,normalize=True) #z-axis or normal vector
+
+#a = [1, 1, 1]
+#a = a/np.linalg.norm(a)
+#ax.quiver(origo[0],origo[1],origo[2], a[0], a[1], a[2], color="royalblue", alpha = 0.5)#,normalize=True) #z-axis or normal vector
 #ax.quiver(origo[0],origo[1],origo[2], 0, 0, -1, color="orange", alpha = 0.5)#,normalize=True) #gravity vector 
 
 # Body frame: this frame rotates
-rad = np.pi/180
-tilt = [30*rad, 10*rad, 10*rad]
-R = main.Rotation_XYZ(tilt)
+tilt = np.radians([30, 30, 0])
+R = m.Rotation_XYZ(tilt)
 x_B, y_B, z_B = [1, 0, 0], [0, 1, 0], [0, 0, 1]
 Rx, Ry, Rz = np.dot(R, x_B), np.dot(R, y_B), np.dot(R, z_B)
 ax.quiver(origo[0],origo[1],origo[2], Rx[0], Rx[1], Rx[2], color="c")#,normalize=True)
@@ -48,14 +51,12 @@ ax.quiver(origo[0],origo[1],origo[2], Ry[0], Ry[1], Ry[2], color="y")#,normalize
 ax.quiver(origo[0],origo[1],origo[2], Rz[0], Rz[1], Rz[2], color="m")#,normalize=True)
 
 
+#Ra = np.dot(R, a)
+#ax.quiver(origo[0],origo[1],origo[2], Ra[0], Ra[1], Ra[2], color="blueviolet")#,normalize=True)
+
 # verification1: shows counter rotation
 # determine how to rotate dashed quivers to match r, g, b quivers
-rad = np.pi/180
-#tilt = [30*rad, 10*rad, 10*rad]
-
-R_in = main.Rotation_ZYX(tilt)
-
-xB, yB, zB = np.dot(R_in, Rx)*1.2, np.dot(R_in, Ry)*1.2, np.dot(R_in, Rz)*1.2
+#tilt = [0*rad, 0*rad, 0*rad]
 
 '''xb = Rot(Rx, xL)
 yb = Rot(Ry, yL)
@@ -65,9 +66,16 @@ xB = np.dot(xb, Rx)*1.2
 yB = np.dot(yb, Ry)*1.2
 zB = np.dot(zb, Rz)*1.2'''
 
-ax.quiver(origo[0],origo[1],origo[2], xB[0], xB[1], xB[2], color="c", linestyle = 'dashed')#,normalize=True)
-ax.quiver(origo[0],origo[1],origo[2], yB[0], yB[1], yB[2], color="y", linestyle = 'dashed')#,normalize=True)
-ax.quiver(origo[0],origo[1],origo[2], zB[0], zB[1], zB[2], color="m", linestyle = 'dashed')#,normalize=True)
+#R_inverse = m.Rotation_ZYX(tilt)
+
+#xB, yB, zB = np.dot(R_inverse, Rx)*1.2, np.dot(R_inverse, Ry)*1.2, np.dot(R_inverse, Rz)*1.2
+
+#ax.quiver(origo[0],origo[1],origo[2], xB[0], xB[1], xB[2], color="c", linestyle = 'dashed')#,normalize=True)
+#ax.quiver(origo[0],origo[1],origo[2], yB[0], yB[1], yB[2], color="y", linestyle = 'dashed')#,normalize=True)
+#ax.quiver(origo[0],origo[1],origo[2], zB[0], zB[1], zB[2], color="m", linestyle = 'dashed')#,normalize=True)
+
+#ra = np.dot(R_inverse, Ra)*1.2
+#ax.quiver(origo[0],origo[1],origo[2], ra[0], ra[1], ra[2], color="blueviolet", linestyle = 'dashed')#,normalize=True)
 
 #ax.quiver(origo[0],origo[1],origo[2], Rx[0], Rx[1], Rx[2], color="c", linestyle = 'dashed')#,normalize=True)
 #ax.quiver(origo[0],origo[1],origo[2], Ry[0], Ry[1], Ry[2], color="y", linestyle = 'dashed')#,normalize=True)
