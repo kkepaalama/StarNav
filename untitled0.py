@@ -60,6 +60,10 @@ z2p = z2p/np.linalg.norm(z2p)
 #ax.quiver(zpp_norm[0], zpp_norm[1], zpp_norm[2], z2p[0], z2p[1], z2p[2], color="pink") #test
 ax.quiver(zp[0], zp[1], zp[2], z2p[0], z2p[1], z2p[2], color="pink") #test 
 
+z_double = np.dot(2, z)
+z_new = z_double - zpp_norm
+ax.quiver(zpp_norm[0], zpp_norm[1], zpp_norm[2], z_new[0], z_new[1], z_new[2], color="pink")
+
 Rxyz = np.dot(main.Rz(psi/2), np.dot(main.Ry(phi/2), main.Rx(theta/2)))
 z1 = np.dot(np.transpose(Rxyz), zpp_norm)
 z1 = z1/np.linalg.norm(z1)
