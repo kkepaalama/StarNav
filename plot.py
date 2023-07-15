@@ -3,16 +3,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-df = pd.read_excel(r'C:\Users\kkepa\Desktop\hokulele\starnav\positions.xlsx','positions_papa2')
-cf = pd.read_excel(r'C:\Users\kkepa\Desktop\hokulele\starnav\positions.xlsx','img_centers_papa2')
+df = pd.read_excel(r'C:\Users\kkepa\Desktop\hokulele\starnav\positions.xlsx','estimated_positions_papa')
+cf = pd.read_excel(r'C:\Users\kkepa\Desktop\hokulele\starnav\positions.xlsx','average_papa')
 
 fig = plt.figure(figsize=(12,9))
 
 m = Basemap(projection='mill',
-           llcrnrlat = 0,
-           urcrnrlat = 30,
-           llcrnrlon = -180,
-           urcrnrlon = -150,
+           llcrnrlat = 18,
+           urcrnrlat = 25,
+           llcrnrlon = -162,
+           urcrnrlon = -152,
            resolution = 'i')
 
 #m = Basemap(projection='mill', llcrnrlat = -90, urcrnrlat = 90, llcrnrlon = -180, urcrnrlon = 180, resolution = 'i')
