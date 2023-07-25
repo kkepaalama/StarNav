@@ -10,17 +10,18 @@ import main
 import geopy.distance
 from ost_output_papakolea import s2
 
+plt.close('all')
+
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 
 
-ground_truth = 21.295084, -157.811978
-ground_truth_radians = np.radians([21.295084, -157.811978])
-gtc = np.array([-0.86272793, -0.35186237,  0.36317129])
+ground_truth = 21.295084, -157.811978 #ground truth of Honolulu, HI <latitude, longitude> in decimal degrees
+ground_truth_radians = np.radians([21.295084, -157.811978]) #ground truth of Honolulu, HI <latitude, longitude> in radians
+gtc = np.array([-0.86272793, -0.35186237,  0.36317129]) #ground truth of Honolulu, HI <x, y, z> as a unit vector in cartesian coordinates
 z_axis = np.array([0, 0, 1])
-z_axis_double = np.dot(2, z_axis)
 
-
+#matplotlib plot set up
 ax.set_xlim([-1.5,1.5])
 ax.set_ylim([-1.5,1.5])
 ax.set_zlim([-1.5,1.5])
@@ -40,56 +41,54 @@ ax.text(0, 0, 1.3, r'$z$')
 # Set an equal aspect ratio
 ax.set_aspect('auto')
 
-#Local frame: this frame is fixed
+#
 x, y, z = [1, 0, 0], [0, 1, 0], [0, 0, 1]
 ax.quiver(o[0], o[1], o[2], x[0], x[1], x[2],  color="r", alpha = 0.5) #linestyle = 'dashed')#,normalize=True) #x-axis
 ax.quiver(o[0], o[1], o[2], y[0], y[1], y[2], color="g", alpha = 0.5) #linestyle = 'dashed')#,normalize=True) #y-axis
 ax.quiver(o[0], o[1], o[2], z[0], z[1], z[2], color="b") #alpha = 0.5) #linestyle = 'dashed')#,normalize=True) #z-axis or normal vector
 ax.quiver(o[0], o[1], o[2], gtc[0], gtc[1], gtc[2], color="dodgerblue", alpha = 0.5)
 
-# Body frame: this frame rotates
-phi = s2.imu_tilt[0] #0.06068190843512727 #roll
-theta = s2.imu_tilt[1] #0.03443821713316293 #pitch
-psi = -0.45076307922650694
-rx = main.Rx(phi)
-ry = main.Ry(theta)
-ryx = np.dot(ry, rx)
-rz = main.Rz(-psi)
-rzyx = np.dot(rx, np.dot(ry, rz))
+#tilt measurements from Berry IMU
+phi = s2.imu_tilt[0] #0.06161487984311333 #roll
+theta = s2.imu_tilt[1] #0.03387764611236473 #pitch
+psi = 0 #yaw #-0.4118977034706618 #yaw collected from thrid party source (OST) NOT RETRIEVED FROM BERRY IMU
 
-'''e = main.cel2ecef(s2.time, s2.cel[0], s2.radec, 'car')
-e1 = main.cel2ecef(s2.time, s2.cel[1], s2.radec, 'car')
-e2 = main.cel2ecef(s2.time, s2.cel[2], s2.radec, 'car')
-e3 = main.cel2ecef(s2.time, s2.cel[3], s2.radec, 'car')
-e4 = main.cel2ecef(s2.time, s2.cel[4], s2.radec, 'car')
-e5 = main.cel2ecef(s2.time, s2.cel[5], s2.radec, 'car')
-e6 = main.cel2ecef(s2.time, s2.cel[6], s2.radec, 'car')
-e7 = main.cel2ecef(s2.time, s2.cel[7], s2.radec, 'car')
-e8 = main.cel2ecef(s2.time, s2.cel[8], s2.radec, 'car')
-e9 = main.cel2ecef(s2.time, s2.cel[9], s2.radec, 'car')
-e10 = main.cel2ecef(s2.time, s2.cel[10], s2.radec, 'car')
-e11 = main.cel2ecef(s2.time, s2.cel[11], s2.radec, 'car')
-e12 = main.cel2ecef(s2.time, s2.cel[12], s2.radec, 'car')
-e13 = main.cel2ecef(s2.time, s2.cel[13], s2.radec, 'car')'''
+#converts star coordinates in GCRS (which is a ECI frame) to ITRS (which is a ECEF frame)
+'''e = main.cel2ecef(s2.time, s2.cel[0], s2.radec, 'gcrs')
+e1 = main.cel2ecef(s2.time, s2.cel[1], s2.radec, 'gcrs')
+e2 = main.cel2ecef(s2.time, s2.cel[2], s2.radec, 'gcrs')
+e3 = main.cel2ecef(s2.time, s2.cel[3], s2.radec, 'gcrs')
+e4 = main.cel2ecef(s2.time, s2.cel[4], s2.radec, 'gcrs')
+e5 = main.cel2ecef(s2.time, s2.cel[5], s2.radec, 'gcrs')
+e6 = main.cel2ecef(s2.time, s2.cel[6], s2.radec, 'gcrs')
+e7 = main.cel2ecef(s2.time, s2.cel[7], s2.radec, 'gcrs')
+e8 = main.cel2ecef(s2.time, s2.cel[8], s2.radec, 'gcrs')
+e9 = main.cel2ecef(s2.time, s2.cel[9], s2.radec, 'gcrs')
+e10 = main.cel2ecef(s2.time, s2.cel[10], s2.radec, 'gcrs')
+e11 = main.cel2ecef(s2.time, s2.cel[11], s2.radec, 'gcrs')
+e12 = main.cel2ecef(s2.time, s2.cel[12], s2.radec, 'gcrs')
+e13 = main.cel2ecef(s2.time, s2.cel[13], s2.radec, 'gcrs')'''
 
+#corresponds to the following above; same array just faster to access. Dont have to run astropy everytime (which takes several minutes)
+i = np.array([-0.90324666, -0.37363883, 0.21104384])
+i1 = np.array([-0.89266356, -0.3883157 , 0.22882892])
+i2 = np.array([-0.85760593, -0.46796905, 0.21334722])
+i3 = np.array([-0.9000319 , -0.3162044 , 0.29992893])
+i4 = np.array([-0.91336259, -0.22340202, 0.34038259])
+i5 = np.array([-0.89228912, -0.33835582, 0.29889037])
+i6 = np.array([-0.8986376 , -0.28618824, 0.33248571])
+i7 = np.array([-0.87694789, -0.33874105, 0.34090601])
+i8 = np.array([-0.87474482, -0.34693303, 0.33831785])
+i9 = np.array([-0.85317901, -0.39964924, 0.33521049])
+i10 = np.array([-0.88122628, -0.24778568, 0.40254504])
+i11 = np.array([-0.86607109, -0.31078677, 0.39157689])
+i12 = np.array([-0.84012673, -0.39511452, 0.37157987])
+i13 = np.array([-0.84967982, -0.29887187, 0.43441894])
 
+v = np.array([-0.88647773, -0.34022819, 0.31369095]) #boresight vector of the camera
 
-i = np.array([-0.90322083, -0.37367258, 0.21109461]) #main.cel2ecef(s2.time, s2.cel[0], s2.radec, 'car')
-i1 = np.array([-0.89263542, -0.3883499 , 0.22888065]) #main.cel2ecef(s2.time, s2.cel[1], s2.radec, 'car')
-i2 = np.array([-0.85757245, -0.46800765, 0.21339712]) #main.cel2ecef(s2.time, s2.cel[2], s2.radec, 'car')
-i3 = np.array([-0.90000306, -0.31623280, 0.29998550]) #main.cel2ecef(s2.time, s2.cel[3], s2.radec, 'car')
-i4 = np.array([-0.91333506, -0.22342375,  0.3404422]) #main.cel2ecef(s2.time, s2.cel[4], s2.radec, 'car')
-i5 = np.array([-0.89225900, -0.33838557, 0.29894663]) #main.cel2ecef(s2.time, s2.cel[5], s2.radec, 'car')
-i6 = np.array([-0.89860768, -0.28621414, 0.33254428]) #main.cel2ecef(s2.time, s2.cel[6], s2.radec, 'car')
-i7 = np.array([-0.87691411, -0.33876983, 0.34096430]) #main.cel2ecef(s2.time, s2.cel[7], s2.radec, 'car')
-i8 = np.array([-0.87471075, -0.34696232, 0.33837591]) #main.cel2ecef(s2.time, s2.cel[8], s2.radec, 'car')
-i9 = np.array([-0.85314156, -0.39968128, 0.33526760]) #main.cel2ecef(s2.time, s2.cel[9], s2.radec, 'car')
-i10 = np.array([-0.8811917, -0.24780785, 0.40260706]) #main.cel2ecef(s2.time, s2.cel[10], s2.radec, 'car')
-i11 = np.array([-0.86603428, -0.31081278, 0.39163765]) #main.cel2ecef(s2.time, s2.cel[11], s2.radec, 'car')
-i12 = np.array([-0.84008633, -0.39514527, 0.37163849]) #main.cel2ecef(s2.time, s2.cel[12], s2.radec, 'car')
-i13 = np.array([-0.8496394 , -0.29889619, 0.43448125]) #main.cel2ecef(s2.time, s2.cel[13], s2.radec, 'car')
-
-
+#re-indexes body coordinates
+# same as applying rotation from startracker "s" to body "b" --> bRs
 idx = [1, 2, 0]
 b = s2.body[0][idx]
 b1 = s2.body[1][idx]
@@ -106,6 +105,8 @@ b11 = s2.body[11][idx]
 b12 = s2.body[12][idx]
 b13 = s2.body[13][idx]
 
+
+#davenport q-Method set up
 B0 = main.B(b, i, 1)
 B1 = main.B(b1, i1, 1)
 B2 = main.B(b2, i2, 1)
@@ -124,42 +125,65 @@ B13 = main.B(b13, i13, 1)
 B = B0 + B1 +B2 + B3 + B4 + B5 + B6 + B7 + B8 + B9 + B10 + B11 + B12 + B13
 K = main.K(B)
 q = main.q(K)
-iRb = main.q2R(q) #iRb rotation from body to inertial
+iRb = main.q2R(q) #rotation from body to inertial
 
 
-br = np.dot(iRb, b)
-br1 = np.dot(iRb, b1)
-br2 = np.dot(iRb, b2)
-#ax.quiver([0], o[1], o[2], b[0], b[1], b[2], color="purple")
-#ax.quiver([0], o[1], o[2], b1[0], b1[1], b1[2], color="purple")
-#ax.quiver([0], o[1], o[2], b2[0], b2[1], b2[2], color="purple")
-#ax.quiver([0], o[1], o[2], br1[0], br1[1], br1[2], color="purple")
-#ax.quiver([0], o[1], o[2], br2[0], br2[1], br2[2], color="purple")
-#ax.quiver([0], o[1], o[2], br[0], br[1], br[2], color="purple")
+b_n_i = np.dot(iRb, z_axis) #normal vector of body rotated to fixed frame
+ax.quiver([0], o[1], o[2], b_n_i[0], b_n_i[1], b_n_i[2], color="b")
+
+i_gt_b = np.dot(np.transpose(iRb), gtc) #ground truth in the body frame
+ax.quiver([0], o[1], o[2], i_gt_b[0], i_gt_b[1], i_gt_b[2], color="dodgerblue")
+
+i_v_b = np.dot(np.transpose(iRb), v) #bosesight vector from i frame rotated to body frame
+#ax.quiver([0], o[1], o[2], i_v_b[0], i_v_b[1], i_v_b[2], color="violet")
 
 
-#ax.quiver([0], o[1], o[2], i[0], i[1], i[2], color="orange")
-#ax.quiver([0], o[1], o[2], i1[0], i1[1], i1[2], color="orange")
-#ax.quiver([0], o[1], o[2], i2[0], i2[1], i2[2], color="orange")
+BB = main.B(z_axis, i_gt_b, 1)
+KK = main.K(BB)
+qq = main.q(KK)
+gRv = main.q2R(qq) #rotation between ground truth in body frame and boresight vector in body frame
 
-z_axis_new = np.dot(iRb, z_axis)
-ax.quiver([0], o[1], o[2], z_axis_new[0], z_axis_new[1], z_axis_new[2], color="b")
+#BB = main.B(v, gtc, 1)
+#KK = main.K(BB)
+#qq = main.q(KK)
+#gRv = main.q2R(qq) #rotation between ground truth in body frame and boresight vector in body frame
 
-t = np.dot(np.transpose(ryx), z_axis)
-#ax.quiver(o[0], o[1], o[2], t[0], t[1], t[2], color="green")
+#extracts euler angles from gRz rotation matrix
+xyz_euler = main.rotation2euler(gRv, 'XYZ')
+xzy_euler = main.rotation2euler(gRv, 'XZY')
+yzx_euler = main.rotation2euler(gRv, 'YZX')
+yxz_euler = main.rotation2euler(gRv, 'YXZ')
+zxy_euler = main.rotation2euler(gRv, 'ZXY')
+zyx_euler = main.rotation2euler(gRv, 'ZYX')
+
+#comparing euler angles extracted from gRz and pitch and roll in a ZYX sequence
+zyx = main.euler(phi, theta, psi, 'ZYX')
+#zyx1 = main.euler(zyx_euler[0], zyx_euler[1], zyx_euler[2], 'ZYX')
+
+#print('zyx: ', zyx)
+#print('zyx1: ',zyx1)
+
+i_v_br1 = np.dot(zyx, i_v_b)
+i_v_br = np.dot(main.Rz(s2.imu_tilt[2]), i_v_br1)
+ax.quiver([0], o[1], o[2], i_v_br[0], i_v_br[1], i_v_br[2], color="violet")
+
+v_i = np.dot(iRb, i_v_br)
+ax.quiver([0], o[1], o[2], v_i[0], v_i[1], v_i[2], color="violet")
+
+
+print(phi, theta, psi)
+#print('xyz:', xzy_euler)
+#print('xzy:', xzy_euler)
+#print('yzx:', yzx_euler)
+#print('yxz:', yxz_euler)
+#print('zxy:', zxy_euler)
+print('zyx:', zyx_euler)
+
+'''t = np.dot(np.transpose(ryx), z_axis)
+ax.quiver(o[0], o[1], o[2], t[0], t[1], t[2], color="green")
 
 tp = np.dot(iRb, t)
-#ax.quiver([0], o[1], o[2], tp[0], tp[1], tp[2], color="green")
-
-bn = np.dot(ryx, b)
-bn1 = np.dot(ryx, b1)
-bn2 = np.dot(ryx, b2)
-#ax.quiver([0], o[1], o[2], bn[0], bn[1], bn[2], color="y")
-#ax.quiver([0], o[1], o[2], bn1[0], bn1[1], bn1[2], color="y")
-#ax.quiver([0], o[1], o[2], bn2[0], bn2[1], bn2[2], color="y")
-
-#gtcr = np.dot(np.transpose(iRb), gtc)
-#ax.quiver([0], o[1], o[2], gtcr[0], gtcr[1], gtcr[2], color="dodgerblue")
+ax.quiver([0], o[1], o[2], tp[0], tp[1], tp[2], color="green")
 
 tpp = np.dot(main.Rz(np.pi), t)
 #ax.quiver([0], o[1], o[2], tpp[0], tpp[1], tpp[2], color="seagreen")
@@ -168,18 +192,23 @@ tpp1 = np.dot(main.Rz(psi), tpp)
 ax.quiver([0], o[1], o[2], tpp1[0], tpp1[1], tpp1[2], color="limegreen")
 
 tpp1_r = np.dot(iRb, tpp1)
-ax.quiver([0], o[1], o[2], tpp1_r[0], tpp1_r[1], tpp1_r[2], color="limegreen")
+ax.quiver([0], o[1], o[2], tpp1_r[0], tpp1_r[1], tpp1_r[2], color="limegreen")'''
 
 
 true_position = main.car2sph(gtc)
-estimated_position = main.car2sph(tpp1_r)
+estimated_position = main.car2sph(v_i)
+#estimated_position_average = 22.790702626103695, -156.38232688929745
 
 print('true position: ', true_position)
 print('estimate position: ', estimated_position)
+#print('estimate position averaged: ', estimated_position_average)
 
 
 coords_1 = (true_position[0], true_position[1])
 coords_2 = (estimated_position[0], estimated_position[1])
+#coords_1 = (18.292083690572113, -159.01179766742428) #difference between ost boresight roll and in-house boresight roll
+#coords_2 = (18.284473438960504, -159.00812327836573)
+#coords_2 = (estimated_position_average[0], estimated_position_average[1])
 print(geopy.distance.geodesic(coords_1, coords_2).miles, 'miles    ', geopy.distance.geodesic(coords_1, coords_2).km, 'km')
 
 plt.show()

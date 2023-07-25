@@ -1,14 +1,14 @@
 #usr/bin/python
 
 '''
-File returns position estimate for image belonging to s15 class
+File returns position estimate for image belonging to s21 class
 '''
 
 import matplotlib.pyplot as plt
 import numpy as np
 import main
 import geopy.distance
-from ost_output_papakolea import s1, s15
+from ost_output_papakolea import s21
 
 
 plt.close('all')
@@ -52,84 +52,80 @@ ax.quiver(o[0], o[1], o[2], z[0], z[1], z[2], color="b") #alpha = 0.5) #linestyl
 ax.quiver(o[0], o[1], o[2], gtc[0], gtc[1], gtc[2], color="dodgerblue", alpha = 0.5)
 
 #tilt measurements from Berry IMU
-phi = s15.imu_tilt[0] #roll
-theta = s15.imu_tilt[1] #pitch
-psi = s15.imu_tilt[2] #yaw
+phi = s21.imu_tilt[0] #roll
+theta = s21.imu_tilt[1] #pitch
+psi = s21.imu_tilt[2] #yaw
 
 #converts star coordinates in GCRS (which is a ECI frame) to ITRS (which is a ECEF frame)
-'''e = main.cel2ecef(s15.time, s15.cel[0], s15.radec, 'gcrs')
-e1 = main.cel2ecef(s15.time, s15.cel[1], s15.radec, 'gcrs')
-e2 = main.cel2ecef(s15.time, s15.cel[2], s15.radec, 'gcrs')
-e3 = main.cel2ecef(s15.time, s15.cel[3], s15.radec, 'gcrs')
-e4 = main.cel2ecef(s15.time, s15.cel[4], s15.radec, 'gcrs')
-e5 = main.cel2ecef(s15.time, s15.cel[5], s15.radec, 'gcrs')
-e6 = main.cel2ecef(s15.time, s15.cel[6], s15.radec, 'gcrs')
-e7 = main.cel2ecef(s15.time, s15.cel[7], s15.radec, 'gcrs')
-e8 = main.cel2ecef(s15.time, s15.cel[8], s15.radec, 'gcrs')
-e9 = main.cel2ecef(s15.time, s15.cel[9], s15.radec, 'gcrs')
-e10 = main.cel2ecef(s15.time, s15.cel[10], s15.radec, 'gcrs')
-e11 = main.cel2ecef(s15.time, s15.cel[11], s15.radec, 'gcrs')
-e12 = main.cel2ecef(s15.time, s15.cel[12], s15.radec, 'gcrs')
-e13 = main.cel2ecef(s15.time, s15.cel[13], s15.radec, 'gcrs')
-e14 = main.cel2ecef(s15.time, s15.cel[14], s15.radec, 'gcrs')
-e15 = main.cel2ecef(s15.time, s15.cel[15], s15.radec, 'gcrs')
-e16 = main.cel2ecef(s15.time, s15.cel[16], s15.radec, 'gcrs')
-e17 = main.cel2ecef(s15.time, s15.cel[17], s15.radec, 'gcrs')
-e18 = main.cel2ecef(s15.time, s15.cel[18], s15.radec, 'gcrs')
-e19 = main.cel2ecef(s15.time, s15.cel[19], s15.radec, 'gcrs')
-e20 = main.cel2ecef(s15.time, s15.cel[20], s15.radec, 'gcrs')'''
+'''e = main.cel2ecef(s21.time, s21.cel[0], s21.radec, 'gcrs')
+e1 = main.cel2ecef(s21.time, s21.cel[1], s21.radec, 'gcrs')
+e2 = main.cel2ecef(s21.time, s21.cel[2], s21.radec, 'gcrs')
+e3 = main.cel2ecef(s21.time, s21.cel[3], s21.radec, 'gcrs')
+e4 = main.cel2ecef(s21.time, s21.cel[4], s21.radec, 'gcrs')
+e5 = main.cel2ecef(s21.time, s21.cel[5], s21.radec, 'gcrs')
+e6 = main.cel2ecef(s21.time, s21.cel[6], s21.radec, 'gcrs')
+e7 = main.cel2ecef(s21.time, s21.cel[7], s21.radec, 'gcrs')
+e8 = main.cel2ecef(s21.time, s21.cel[8], s21.radec, 'gcrs')
+e9 = main.cel2ecef(s21.time, s21.cel[9], s21.radec, 'gcrs')
+e10 = main.cel2ecef(s21.time, s21.cel[10], s21.radec, 'gcrs')
+e11 = main.cel2ecef(s21.time, s21.cel[11], s21.radec, 'gcrs')
+e12 = main.cel2ecef(s21.time, s21.cel[12], s21.radec, 'gcrs')
+e13 = main.cel2ecef(s21.time, s21.cel[13], s21.radec, 'gcrs')
+e14 = main.cel2ecef(s21.time, s21.cel[14], s21.radec, 'gcrs')
+e15 = main.cel2ecef(s21.time, s21.cel[15], s21.radec, 'gcrs')
+e16 = main.cel2ecef(s21.time, s21.cel[16], s21.radec, 'gcrs')
+e17 = main.cel2ecef(s21.time, s21.cel[17], s21.radec, 'gcrs')
+e18 = main.cel2ecef(s21.time, s21.cel[18], s21.radec, 'gcrs')'''
+
 
 #corresponds to the following above; same array just faster to access. Dont have to run astropy everytime (which takes several minutes)
-i = np.array([-0.97821973, -0.1924226, -0.07784406]) #main.cel2ecef(s15.time, s15.cel[0], s15.radec, 'gcrs')
-i1 = np.array([-0.96691117, -0.23662054, -0.09535987])
-i2 = np.array([-0.97571006, -0.21059056, -0.06034473])
-i3 = np.array([-0.96512436, -0.25288187, -0.06771805])
-i4 = np.array([-0.923449  , -0.36710193, -0.11170545])
-i5 = np.array([-0.92863862, -0.36926282, -0.03571122])
-i6 = np.array([-0.98784395, -0.12111227, 0.09744823])
-i7 = np.array([-0.95906017, -0.28216481, 0.02422011])
-i8 = np.array([-0.98657838, -0.12474485, 0.1053652 ])
-i9 = np.array([-0.9616978 , -0.27103958, 0.04092533])
-i10 = np.array([-0.92675062, -0.37541948, -0.01391055])
-i11 = np.array([-0.9811226, -0.1695046, 0.0930948])
-i12 = np.array([-0.92520234, -0.3794564, -0.00367149])
-i13 = np.array([-0.93272994, -0.36036097, 0.0124426 ])
-i14 = np.array([-0.95175037, -0.30298757, 0.04868023])
-i15 = np.array([-0.97257871, -0.19906687, 0.12026238])
-i16 = np.array([-0.97296439, -0.19112344, 0.12966157])
-i17 = np.array([-0.95866874, -0.26548786, 0.1023252 ])
-i18 = np.array([-0.95437793, -0.28108867, 0.10075674])
-i19 = np.array([-0.97350563, -0.14416853, 0.17748868])
-i20 =  np.array([-0.9711149, -0.16179435, 0.17538082])
+i = np.array([-0.97959712, -0.19169769, -0.0603447 ]) #main.cel2ecef(s21.time, s21.cel[0], s21.radec, 'gcrs')
+i1 = np.array([-0.96983058, -0.23418565, -0.06771802])
+i2 = np.array([-0.93037007, -0.34918968, -0.11170543])
+i3 = np.array([-0.94694094, -0.31307492, -0.0727114 ])
+i4 = np.array([-0.93560047, -0.35124988, -0.03571119])
+i5 = np.array([-0.96433335, -0.2635803 , 0.02422014])
+i6 = np.array([-0.96675552, -0.25240618, 0.04092535])
+i7 = np.array([-0.93383178, -0.35744188, -0.01391052])
+i8 = np.array([-0.93236179, -0.36150796, -0.00367147])
+i9 = np.array([-0.93951902, -0.34227064,  0.01244262])
+i10 = np.array([-0.95742727, -0.28454042, 0.04868026])
+i11 = np.array([-0.90488738, -0.42507007, -0.02223197])
+i12 = np.array([-0.97624367, -0.18023666, 0.1202624 ])
+i13 = np.array([-0.97647579, -0.17228726, 0.1296616 ])
+i14 = np.array([-0.96361974, -0.24691403, 0.10232522])
+i15 = np.array([-0.95963119, -0.26259484, 0.10075677])
+i16 = np.array([-0.97610962, -0.12533066, 0.17748871])
+i17 = np.array([-0.97405992, -0.14299939, 0.17538085])
+i18 = np.array([-0.89799432, -0.43923634, 0.02603169])
 
 
-v = np.array([-0.9695133, -0.24451092 , 0.01607371]) #boresight vector of the camera
+
+v = np.array([-0.96975442, -0.24353585, 0.01632937]) #boresight vector of the camera
 ax.quiver(o[0], o[1], o[2], v[0], v[1], v[2], color="violet")
 
 #re-indexes body coordinates
 # same as applying rotation from startracker "s" to body "b" --> bRs
 idx = [1, 2, 0]
-b = s15.body[0][idx]
-b1 = s15.body[1][idx]
-b2 = s15.body[2][idx]
-b3 = s15.body[3][idx]
-b4 = s15.body[4][idx]
-b5 = s15.body[5][idx]
-b6 = s15.body[6][idx]
-b7 = s15.body[7][idx]
-b8 = s15.body[8][idx]
-b9 = s15.body[9][idx]
-b10 = s15.body[10][idx]
-b11 = s15.body[11][idx]
-b12 = s15.body[12][idx]
-b13 = s15.body[13][idx]
-b14 = s15.body[14][idx]
-b15 = s15.body[15][idx]
-b16 = s15.body[16][idx]
-b17 = s15.body[17][idx]
-b18 = s15.body[18][idx]
-b19 = s15.body[19][idx]
-b20 = s15.body[20][idx]
+b = s21.body[0][idx]
+b1 = s21.body[1][idx]
+b2 = s21.body[2][idx]
+b3 = s21.body[3][idx]
+b4 = s21.body[4][idx]
+b5 = s21.body[5][idx]
+b6 = s21.body[6][idx]
+b7 = s21.body[7][idx]
+b8 = s21.body[8][idx]
+b9 = s21.body[9][idx]
+b10 = s21.body[10][idx]
+b11 = s21.body[11][idx]
+b12 = s21.body[12][idx]
+b13 = s21.body[13][idx]
+b14 = s21.body[14][idx]
+b15 = s21.body[15][idx]
+b16 = s21.body[16][idx]
+b17 = s21.body[17][idx]
+b18 = s21.body[18][idx]
 
 #davenport q-Method set up
 B0 = main.B(b, i, 1)
@@ -151,9 +147,6 @@ B15 = main.B(b15, i15, 1)
 B16 = main.B(b16, i16, 1)
 B17 = main.B(b17, i17, 1)
 B18 = main.B(b18, i18, 1)
-B19 = main.B(b19, i19, 1)
-B20 = main.B(b20, i20, 1)
-
 
 '''
 #star vectors in body frame plotted in body frame
@@ -201,7 +194,7 @@ ax.quiver(o[0], o[1], o[2], i18[0], i18[1], i18[2], color="coral")
 ax.quiver(o[0], o[1], o[2], i19[0], i19[1], i19[2], color="coral")
 ax.quiver(o[0], o[1], o[2], i20[0], i20[1], i20[2], color="coral")'''
 
-B = B0 + B1 +B2 + B3 + B4 + B5 + B6 + B7 + B8 + B9 + B10 + B11 +B12 + B13 + B14 + B15 + B16 + B17 + B18 + B19 + B20
+B = B0 + B1 +B2 + B3 + B4 + B5 + B6 + B7 + B8 + B9 + B10 + B11 +B12 + B13 + B14 + B15 + B16 + B17 + B18
 K = main.K(B)
 q = main.q(K)
 iRb = main.q2R(q) #rotation from body to inertial
@@ -239,7 +232,7 @@ zyx = main.euler(phi, theta, psi, 'ZYX')
 #zyx1 = main.euler(zyx_euler[0], zyx_euler[1], zyx_euler[2], 'ZYX')
 
 i_v_br = np.dot(zyx, i_v_b)
-#i_v_br = np.dot(main.Rz(-s15.imu_tilt[2]), i_v_br1)
+#i_v_br = np.dot(main.Rz(np.radians(-s21.imu_tilt[2])), i_v_br1)
 ax.quiver([0], o[1], o[2], i_v_br[0], i_v_br[1], i_v_br[2], color="violet")
 
 v_i = np.dot(iRb, i_v_br)

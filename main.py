@@ -18,7 +18,7 @@ def cel2ecef(time, cel, radec, mode):
     time = [time]
     t = Time(time, format='iso', scale='utc')
     if mode == 'radec2car':
-        crs = SkyCoord(ra = radec[0]*u.degree, dec = radec[1]*u.degree, obstime = t, frame = 'icrs', unit = 'deg')
+        crs = SkyCoord(ra = radec[0]*u.degree, dec = radec[1]*u.degree, obstime = t, frame = 'gcrs', unit = 'deg')
         trs = crs.itrs
         radec2car = np.array([trs.x, trs.y, trs.z])
         return radec2car
@@ -37,7 +37,12 @@ def cel2ecef(time, cel, radec, mode):
         trs = crs.itrs
         trs.representation_type = 'spherical'
         return trs
-    
+    if mode == 'gcrs':
+        gcrs = SkyCoord(x = cel[0], y = cel[1], z = cel[2], obstime = t, frame = 'gcrs', representation_type = 'cartesian')
+        trs = gcrs.itrs
+        trs = np.array([trs.x, trs.y, trs.z])
+        return trs
+
 def eci2ecef(time, eci_vector):
     time = [time]
     t = Time(time, format = 'iso', scale ='utc')
@@ -338,3 +343,78 @@ def Rz(theta):
                    [np.sin(theta), np.cos(theta), 0],
                    [0, 0, 1]])
     return rz
+
+def euler(phi, theta, psi, mode):
+    rx = np.array([[1, 0, 0],
+                   [0, (np.cos(phi)), -np.sin(phi)],
+                   [0, np.sin(phi), np.cos(phi)]])
+    ry = np.array([[np.cos(theta), 0, np.sin(theta)],
+                   [0, 1, 0],
+                   [-np.sin(theta), 0, np.cos(theta)]])
+    rz = np.array([[np.cos(psi), -np.sin(psi), 0],
+                   [np.sin(psi), np.cos(psi), 0],
+                   [0, 0, 1]])
+    if mode == 'XYZ':
+        xyz = np.dot(rz, np.dot(ry, rx))
+        return xyz
+    if mode == 'XZY':
+        xzy = np.dot(ry, np.dot(rz, rx))
+        return xzy
+    if mode == 'YZX':
+        yzx = np.dot(rx, np.dot(rz, ry))
+        return yzx
+    if mode == 'YXZ':
+        yzx = np.dot(rz, np.dot(rx, ry))
+        return yzx
+    if mode == 'ZXY':
+        zxy = np.dot(ry, np.dot(rx, rz))
+        return zxy
+    if mode == 'ZYX':
+        zyx = np.dot(rx, np.dot(ry, rz))
+        return zyx
+    
+def rotation2euler(rotation_matrix, mode):
+    r = rotation_matrix
+    if mode == 'XYZ':
+        alpha = np.arctan2(r[1, 0], r[0, 0])
+        beta = np.arcsin(-r[2, 0])
+        gamma = np.arctan2(r[2, 1], r[2, 2])
+        euler_angles = [alpha, beta, gamma]
+        return euler_angles
+    if mode == 'XZY':
+        alpha = np.arctan2(-r[2, 0], r[0, 0])
+        beta = np.arcsin(r[1, 0])
+        gamma = np.arctan2(-r[1, 2], r[1, 1])
+        euler_angles = [alpha, beta, gamma]
+        return euler_angles
+    if mode == 'YZX':
+        alpha = np.arctan2(r[2, 1], r[1, 1])
+        beta = np.arcsin(-r[0, 1])
+        gamma = np.arctan2(r[0, 2], r[0, 0])
+        euler_angles = [alpha, beta, gamma]
+        return euler_angles
+    if mode == 'YXZ':
+        alpha = np.arctan2(-r[0, 1], r[1, 1])
+        beta = np.arcsin(r[2, 1])
+        gamma = np.arctan2(-r[2, 0], r[2, 2])
+        euler_angles = [alpha, beta, gamma]
+        return euler_angles
+    if mode == 'ZXY':
+        alpha = np.arctan2(r[0, 2], r[2, 2])
+        beta = np.arcsin(-r[1, 2])
+        gamma = np.arctan2(r[1, 0], r[1, 1])
+        euler_angles = [alpha, beta, gamma]
+        return euler_angles
+    if mode == 'ZYX':
+        alpha = np.arctan2(-r[1, 2], r[2, 2])
+        beta = np.arcsin(r[0, 2])
+        gamma = np.arctan2(-r[0, 1], r[0, 0])
+        euler_angles = [alpha, beta, gamma]
+        return euler_angles
+    
+    
+    
+    
+    
+    
+        
