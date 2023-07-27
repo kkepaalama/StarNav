@@ -51,7 +51,7 @@ ax.quiver(o[0], o[1], o[2], gtc[0], gtc[1], gtc[2], color="dodgerblue", alpha = 
 #tilt measurements from Berry IMU
 phi = s1.imu_tilt[0] #0.06161487984311333 #roll
 theta = s1.imu_tilt[1] #0.03387764611236473 #pitch
-psi = 0 #yaw #-0.4118977034706618 #yaw collected from thrid party source (OST) NOT RETRIEVED FROM BERRY IMU
+psi = s1.imu_tilt[2] #yaw #-0.4118977034706618 #yaw collected from thrid party source (OST) NOT RETRIEVED FROM BERRY IMU
 
 #converts star coordinates in GCRS (which is a ECI frame) to ITRS (which is a ECEF frame)
 '''e = main.cel2ecef(s1.time, s1.cel[0], s1.radec, 'gcrs')
@@ -154,8 +154,8 @@ zyx = main.euler(phi, theta, psi, 'ZYX')
 #print('zyx: ', zyx)
 #print('zyx1: ',zyx1)
 
-i_v_br1 = np.dot(zyx, i_v_b)
-i_v_br = np.dot(main.Rz(s1.imu_tilt[2]), i_v_br1)
+i_v_br = np.dot(zyx, i_v_b)
+#i_v_br = np.dot(main.Rz(s1.imu_tilt[2]), i_v_br1)
 ax.quiver([0], o[1], o[2], i_v_br[0], i_v_br[1], i_v_br[2], color="violet")
 
 v_i = np.dot(iRb, i_v_br)

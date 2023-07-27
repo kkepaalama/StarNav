@@ -57,31 +57,33 @@ ryx = np.dot(ry, rx)
 rz = main.Rz(-psi)
 rzyx = np.dot(rx, np.dot(ry, rz))
 
-e = main.cel2ecef(s13.time, s13.cel[0], s13.radec, 'car')
-e1 = main.cel2ecef(s13.time, s13.cel[1], s13.radec, 'car')
-e2 = main.cel2ecef(s13.time, s13.cel[2], s13.radec, 'car')
-e3 = main.cel2ecef(s13.time, s13.cel[3], s13.radec, 'car')
-e4 = main.cel2ecef(s13.time, s13.cel[4], s13.radec, 'car')
-e5 = main.cel2ecef(s13.time, s13.cel[5], s13.radec, 'car')
-e6 = main.cel2ecef(s13.time, s13.cel[6], s13.radec, 'car')
-e7 = main.cel2ecef(s13.time, s13.cel[7], s13.radec, 'car')
-e8 = main.cel2ecef(s13.time, s13.cel[8], s13.radec, 'car')
-e9 = main.cel2ecef(s13.time, s13.cel[9], s13.radec, 'car')
-e10 = main.cel2ecef(s13.time, s13.cel[10], s13.radec, 'car')
+e = main.cel2ecef(s13.time, s13.cel[0], s13.radec, 'gcrs')
+e1 = main.cel2ecef(s13.time, s13.cel[1], s13.radec, 'gcrs')
+e2 = main.cel2ecef(s13.time, s13.cel[2], s13.radec, 'gcrs')
+e3 = main.cel2ecef(s13.time, s13.cel[3], s13.radec, 'gcrs')
+e4 = main.cel2ecef(s13.time, s13.cel[4], s13.radec, 'gcrs')
+e5 = main.cel2ecef(s13.time, s13.cel[5], s13.radec, 'gcrs')
+e6 = main.cel2ecef(s13.time, s13.cel[6], s13.radec, 'gcrs')
+e7 = main.cel2ecef(s13.time, s13.cel[7], s13.radec, 'gcrs')
+e8 = main.cel2ecef(s13.time, s13.cel[8], s13.radec, 'gcrs')
+e9 = main.cel2ecef(s13.time, s13.cel[9], s13.radec, 'gcrs')
+e10 = main.cel2ecef(s13.time, s13.cel[10], s13.radec, 'gcrs')
+ev = main.cel2ecef(s13.time, s13.cel[10], s13.radec, 'radec2car')
 
 
-i = np.array([-0.87361653, -0.43732804, 0.21339717]) #main.cel2ecef(s13.time, s13.cel[0], s13.radec, 'car')
-i1 = np.array([-0.91064277, -0.28414507, 0.29998555]) #main.cel2ecef(s13.time, s13.cel[1], s13.radec, 'car')
-i2 = np.array([-0.92067796, -0.19092191, 0.34044224]) #main.cel2ecef(s13.time, s13.cel[2], s13.radec, 'car')
-i3 = np.array([-0.90368849, -0.30655832, 0.29894668]) #main.cel2ecef(s13.time, s13.cel[3], s13.radec, 'car')
-i4 = np.array([-0.90818463, -0.2541947 , 0.33254433]) #main.cel2ecef(s13.time, s13.cel[4], s13.radec, 'car')
-i5 = np.array([-0.88645515, -0.31575146, 0.33837595]) #main.cel2ecef(s13.time, s13.cel[5], s13.radec, 'car')
-i6 = np.array([-0.86676745, -0.36920155, 0.33526765]) #main.cel2ecef(s13.time, s13.cel[6], s13.radec, 'car')
-i7 = np.array([-0.88941877, -0.21642961, 0.4026071 ]) #main.cel2ecef(s13.time, s13.cel[7], s13.radec, 'car')
-i8 = np.array([-0.87650326, -0.27993204, 0.39163769]) #main.cel2ecef(s13.time, s13.cel[8], s13.radec, 'car')
-i9 = np.array([-0.85969645, -0.26860384, 0.43448129]) #main.cel2ecef(s13.time, s13.cel[9], s13.radec, 'car')
-i10 = np.array([-0.86227264, -0.20064265, 0.46500369]) #main.cel2ecef(s13.time, s13.cel[10], s13.radec, 'car')
+i = np.array([-0.87364813, -0.43728868,  0.21334824])
+i1 = np.array([-0.91067012, -0.28411608,  0.29992993])
+i2 = np.array([-0.92070424, -0.19089963,  0.34038356])
+i3 = np.array([-0.90371705, -0.30652793,  0.29889137])
+i4 = np.array([-0.90821315, -0.25416816,  0.33248671])
+i5 = np.array([-0.88648763, -0.31572136,  0.33831884])
+i6 = np.array([-0.8668032 , -0.36916859,  0.33521148])
+i7 = np.array([-0.88945202, -0.2164066 ,  0.402546  ])
+i8 = np.array([-0.87653859, -0.2799051 ,  0.39157786])
+i9 = np.array([-0.85973542, -0.26857845,  0.4344199 ])
+i10 = np.array([-0.86231167, -0.20062163,  0.46494047])
 
+v = np.array([-0.88635613, -0.34064836,  0.31357855])
 
 idx = [1, 2, 0]
 b = s13.body[0][idx]
@@ -114,30 +116,58 @@ q = main.q(K)
 iRb = main.q2R(q) #iRb rotation from body to inertial
 
 
-z_axis_new = np.dot(iRb, z_axis)
+b_n_i = np.dot(iRb, z_axis) #normal vector of body rotated to fixed frame
+ax.quiver([0], o[1], o[2], b_n_i[0], b_n_i[1], b_n_i[2], color="b")
+
+i_gt_b = np.dot(np.transpose(iRb), gtc) #ground truth in the body frame
+ax.quiver([0], o[1], o[2], i_gt_b[0], i_gt_b[1], i_gt_b[2], color="dodgerblue")
+
+i_v_b = np.dot(np.transpose(iRb), v) #bosesight vector from i frame rotated to body frame
+#ax.quiver([0], o[1], o[2], i_v_b[0], i_v_b[1], i_v_b[2], color="violet")
+
+'''z_axis_new = np.dot(iRb, z_axis)
+y_axis_new = np.dot(iRb, y_axis)
+x_axis_new = np.dot(iRb, x_axis)
 ax.quiver([0], o[1], o[2], z_axis_new[0], z_axis_new[1], z_axis_new[2], color="b")
+ax.quiver([0], o[1], o[2], y_axis_new[0], y_axis_new[1], y_axis_new[2], color="g")
+ax.quiver([0], o[1], o[2], x_axis_new[0], x_axis_new[1], x_axis_new[2], color="r")'''
 
-t = np.dot(np.transpose(ryx), z_axis)
-ax.quiver(o[0], o[1], o[2], t[0], t[1], t[2], color="green")
+BB = main.B(z_axis, i_gt_b, 1)
+KK = main.K(BB)
+qq = main.q(KK)
+gRz = main.q2R(qq)
 
-tp = np.dot(iRb, t)
-ax.quiver([0], o[1], o[2], tp[0], tp[1], tp[2], color="green")
 
-tpp = np.dot(main.Rz(np.pi), t)
-#ax.quiver([0], o[1], o[2], tpp[0], tpp[1], tpp[2], color="seagreen")
+xyz_euler = main.rotation2euler(gRz, 'XYZ')
+xzy_euler = main.rotation2euler(gRz, 'XZY')
+yzx_euler = main.rotation2euler(gRz, 'YZX')
+yxz_euler = main.rotation2euler(gRz, 'YXZ')
+zxy_euler = main.rotation2euler(gRz, 'ZXY')
+zyx_euler = main.rotation2euler(gRz, 'ZYX')
 
-tpp1 = np.dot(main.Rz(psi), tpp)
-ax.quiver([0], o[1], o[2], tpp1[0], tpp1[1], tpp1[2], color="limegreen")
+zyx = main.euler(phi, theta, psi, 'ZYX')
+#zyx1 = main.euler(zyx_euler[0], zyx_euler[1], zyx_euler[2], 'ZYX')
 
-tpp1_r = np.dot(iRb, tpp1)
-ax.quiver([0], o[1], o[2], tpp1_r[0], tpp1_r[1], tpp1_r[2], color="limegreen")
+i_v_br = np.dot(zyx, i_v_b)
+#i_v_br = np.dot(main.Rz(-s15.imu_tilt[2]), i_v_br1)
+ax.quiver([0], o[1], o[2], i_v_br[0], i_v_br[1], i_v_br[2], color="violet")
 
+v_i = np.dot(iRb, i_v_br)
+ax.quiver([0], o[1], o[2], v_i[0], v_i[1], v_i[2], color="violet")
+
+print(phi, theta, psi)
+#print('xyz:', xzy_euler)
+#print('xzy:', xzy_euler)
+#print('yzx:', yzx_euler)
+#print('yxz:', yxz_euler)
+#print('zxy:', zxy_euler)
+print('zyx:', zyx_euler)
 
 true_position = main.car2sph(gtc)
-estimated_position = main.car2sph(tpp1_r)
+estimated_position = main.car2sph(v_i)
 
-print('true position: ', true_position)
-print('estimate position: ', estimated_position)
+print('true position_XYZ: ', true_position)
+print('estimate position_XYZ: ', estimated_position)
 
 
 coords_1 = (true_position[0], true_position[1])

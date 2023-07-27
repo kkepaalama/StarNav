@@ -1,14 +1,14 @@
 #usr/bin/python
 
 '''
-File returns position estimate for image belonging to s4 class
+File returns position estimate for image belonging to s5 class
 '''
 
 import matplotlib.pyplot as plt
 import numpy as np
 import main
 import geopy.distance
-from ost_output_papakolea import s4
+from ost_output_papakolea import s5
 
 plt.close('all')
 
@@ -49,56 +49,56 @@ ax.quiver(o[0], o[1], o[2], z[0], z[1], z[2], color="b") #alpha = 0.5) #linestyl
 ax.quiver(o[0], o[1], o[2], gtc[0], gtc[1], gtc[2], color="dodgerblue", alpha = 0.5)
 
 #tilt measurements from Berry IMU
-phi = s4.imu_tilt[0] #0.06161487984311333 #roll
-theta = s4.imu_tilt[1] #0.03387764611236473 #pitch
-psi = s4.imu_tilt[2] #yaw #-0.4118977034706618 #yaw collected from thrid party source (OST) NOT RETRIEVED FROM BERRY IMU
+phi = s5.imu_tilt[0] #0.06161487984311333 #roll
+theta = s5.imu_tilt[1] #0.03387764611236473 #pitch
+psi = s5.imu_tilt[2] #yaw #-0.4118977034706618 #yaw collected from thrid party source (OST) NOT RETRIEVED FROM BERRY IMU
 
 #converts star coordinates in GCRS (which is a ECI frame) to ITRS (which is a ECEF frame)
-e = main.cel2ecef(s4.time, s4.cel[0], s4.radec, 'gcrs')
-e1 = main.cel2ecef(s4.time, s4.cel[1], s4.radec, 'gcrs')
-e2 = main.cel2ecef(s4.time, s4.cel[2], s4.radec, 'gcrs')
-e3 = main.cel2ecef(s4.time, s4.cel[3], s4.radec, 'gcrs')
-e4 = main.cel2ecef(s4.time, s4.cel[4], s4.radec, 'gcrs')
-e5 = main.cel2ecef(s4.time, s4.cel[5], s4.radec, 'gcrs')
-e6 = main.cel2ecef(s4.time, s4.cel[6], s4.radec, 'gcrs')
-e7 = main.cel2ecef(s4.time, s4.cel[7], s4.radec, 'gcrs')
-e8 = main.cel2ecef(s4.time, s4.cel[8], s4.radec, 'gcrs')
-e9 = main.cel2ecef(s4.time, s4.cel[9], s4.radec, 'gcrs')
-e10 = main.cel2ecef(s4.time, s4.cel[10], s4.radec, 'gcrs')
-e11 = main.cel2ecef(s4.time, s4.cel[11], s4.radec, 'gcrs')
-ev = main.cel2ecef(s4.time, s4.cel[10], s4.radec, 'radec2car')
+e = main.cel2ecef(s5.time, s5.cel[0], s5.radec, 'gcrs')
+e1 = main.cel2ecef(s5.time, s5.cel[1], s5.radec, 'gcrs')
+e2 = main.cel2ecef(s5.time, s5.cel[2], s5.radec, 'gcrs')
+e3 = main.cel2ecef(s5.time, s5.cel[3], s5.radec, 'gcrs')
+e4 = main.cel2ecef(s5.time, s5.cel[4], s5.radec, 'gcrs')
+e5 = main.cel2ecef(s5.time, s5.cel[5], s5.radec, 'gcrs')
+e6 = main.cel2ecef(s5.time, s5.cel[6], s5.radec, 'gcrs')
+e7 = main.cel2ecef(s5.time, s5.cel[7], s5.radec, 'gcrs')
+e8 = main.cel2ecef(s5.time, s5.cel[8], s5.radec, 'gcrs')
+e9 = main.cel2ecef(s5.time, s5.cel[9], s5.radec, 'gcrs')
+e10 = main.cel2ecef(s5.time, s5.cel[10], s5.radec, 'gcrs')
+e11 = main.cel2ecef(s5.time, s5.cel[11], s5.radec, 'gcrs')
+ev = main.cel2ecef(s5.time, s5.cel[10], s5.radec, 'radec2car')
 
 #corresponds to the following above; same array just faster to access. Dont have to run astropy everytime (which takes several minutes)
-i = np.array([-0.89513657, -0.38257989,  0.22882991])
-i1 = np.array([-0.86059074, -0.46245653,  0.2133482 ])
-i2 = np.array([-0.90204199, -0.31042276,  0.2999299 ])
-i3 = np.array([-0.91477689, -0.21753674,  0.34038353])
-i4 = np.array([-0.89444149, -0.33262341,  0.29889134])
-i5 = np.array([-0.9004551 , -0.28041616,  0.33248667])
-i6 = np.array([-0.87695255, -0.341313  ,  0.3383188 ])
-i7 = np.array([-0.85572544, -0.3941665 ,  0.33521144])
-i8 = np.array([-0.88279765, -0.24212608,  0.40254596])
-i9 = np.array([-0.86804703, -0.30522312,  0.39157783])
-i10 = np.array([-0.85157962, -0.29341363,  0.43441986])
-i11 = np.array([-0.85612679, -0.22556018,  0.46494043])
+i = np.array([-0.90682745, -0.36486168,  0.21104485])
+i1 = np.array([-0.89638717, -0.37964049,  0.22882992])
+i2 = np.array([-0.86210363, -0.45963006,  0.21334821])
+i3 = np.array([-0.90305577, -0.30746109,  0.2999299 ])
+i4 = np.array([-0.9154858 , -0.21453378,  0.34038353])
+i5 = np.array([-0.89552816, -0.32968655,  0.29889134])
+i6 = np.array([-0.90137042, -0.27745985,  0.33248668])
+i7 = np.array([-0.87806782, -0.33843348,  0.3383188 ])
+i8 = np.array([-0.88358742, -0.23922793,  0.40254597])
+i9 = np.array([-0.86904392, -0.30237302,  0.39157783])
+i10 = np.array([-0.85253785, -0.29061763,  0.43441987])
+i11 = np.array([-0.85686234, -0.22274963,  0.46494044])
 
-v = np.array([-0.8864683 , -0.34030435,  0.313635  ]) #boresight vector of the camera
+v = np.array([-0.88653077, -0.34020958,  0.31356122]) #boresight vector of the camera
 
 #re-indexes body coordinates
 # same as applying rotation from startracker "s" to body "b" --> bRs
 idx = [1, 2, 0]
-b = s4.body[0][idx]
-b1 = s4.body[1][idx]
-b2 = s4.body[2][idx]
-b3 = s4.body[3][idx]
-b4 = s4.body[4][idx]
-b5 = s4.body[5][idx]
-b6 = s4.body[6][idx]
-b7 = s4.body[7][idx]
-b8 = s4.body[8][idx]
-b9 = s4.body[9][idx]
-b10 = s4.body[10][idx]
-b11 = s4.body[11][idx]
+b = s5.body[0][idx]
+b1 = s5.body[1][idx]
+b2 = s5.body[2][idx]
+b3 = s5.body[3][idx]
+b4 = s5.body[4][idx]
+b5 = s5.body[5][idx]
+b6 = s5.body[6][idx]
+b7 = s5.body[7][idx]
+b8 = s5.body[8][idx]
+b9 = s5.body[9][idx]
+b10 = s5.body[10][idx]
+b11 = s5.body[11][idx]
 
 #davenport q-Method set up
 B0 = main.B(b, i, 1)
@@ -156,7 +156,7 @@ zyx = main.euler(phi, theta, psi, 'ZYX')
 #print('zyx1: ',zyx1)
 
 i_v_br = np.dot(zyx, i_v_b)
-#i_v_br = np.dot(main.Rz(s4.imu_tilt[2]), i_v_br1)
+#i_v_br = np.dot(main.Rz(s5.imu_tilt[2]), i_v_br1)
 ax.quiver([0], o[1], o[2], i_v_br[0], i_v_br[1], i_v_br[2], color="violet")
 
 v_i = np.dot(iRb, i_v_br)

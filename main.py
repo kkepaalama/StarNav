@@ -15,7 +15,7 @@ import astropy.units as u
 
 #ITRS(Cel) to ITRS(ECEF)
 def cel2ecef(time, cel, radec, mode):
-    time = [time]
+    time = time
     t = Time(time, format='iso', scale='utc')
     if mode == 'radec2car':
         crs = SkyCoord(ra = radec[0]*u.degree, dec = radec[1]*u.degree, obstime = t, frame = 'gcrs', unit = 'deg')
@@ -411,10 +411,3 @@ def rotation2euler(rotation_matrix, mode):
         gamma = np.arctan2(-r[0, 1], r[0, 0])
         euler_angles = [alpha, beta, gamma]
         return euler_angles
-    
-    
-    
-    
-    
-    
-        
