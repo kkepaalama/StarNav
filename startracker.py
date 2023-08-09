@@ -264,12 +264,12 @@ class star_image:
 				B.append([s_db.x,s_db.y,s_db.z])
 				W.append(weight)
 				star_out.append(str(temp[0,0])+','+str(temp[1,0])+','+str(temp[2,0])+','+str(s_db.x)+','+str(s_db.y)+','+str(s_db.z)+','+str(weight))
-		print ("stars",len(star_out), file=sys.stderr)
-		print ("ang_rate: "+angrate_string, file=sys.stderr)
-		print (" ".join(star_out)+" "+angrate_string)
-		print(A)
-		print(B)
-		print(W)
+		print ("stars = ",len(star_out), file=sys.stderr)
+		#print ("ang_rate: "+angrate_string, file=sys.stderr)
+		#print (" ".join(star_out)+" "+angrate_string)
+		print('body =', A)
+		print('eci =', B)
+		print('wt =', W)
 
 NONSTARS={}
 NONSTAR_NEXT_ID=0
@@ -408,7 +408,6 @@ class star_camera:
 		else:
 			self.last_match=None
 		print("Time6: "+str(time() - starttime), file=sys.stderr)
-		print("Time7: "+str(time() - starttime), file=sys.stderr)
 		
 	def extrapolate_image(self,imagefile1,imagefile2,time1,time2):
 		#self.solve_image(imagefile2,lis=1,quiet=0)
