@@ -20,6 +20,30 @@ It is important to capture images with a clear view of the stars. Therefore, fie
 - Run ```cd tests/ ./unit_test.sh -crei yourcamera```
 - **Note** Should the images fail to solve, edit the photos by varying the contrast. The images should clearly show bright starts against a dark background.
 - Save raw output as a .txt file.
+- Edit .txt file into the correct format.
+- Run ```base.py``` using ```StarImage``` class.
 
 ## Edit .txt File
-The raw output file needs to be edited into a readable format for StarNav.
+The raw output file needs to be edited into a readable format for StarNav. Edit the file to match the format below. 
+~~~
+time = 'YYYY-MM-DD HH:MM:SS' #rgb.solve_image('directory/image.png')
+DEC=21.380656
+RA=280.552804
+ORIENTATION=-166.918234
+stars =  1
+body = [[0.9953135251998901, -0.04998224973678589, 0.08278121799230576]]
+eci = [[0.2399647980928421, -0.9237858057022095, 0.29839015007019043]]
+wt = [1.3923705392478263]
+radec = [RA, DEC]
+body = np.array(body)
+eci = np.array(eci)
+tilt = [-0.005935353, -0.014718526, np.radians(180 + ORIENTATION)]
+s1 = StarImage(time, body, eci, wt, tilt, stars, radec)
+~~~
+The tilt measurements will need to matched to each corresponding image and recorded in the text. Due to the exposure time of the camera on the sensor suite, 6 seconds (the duration of exposure) was added to ```time```. It is also worth noting that the camera default setting timestamps image in UTC+0:00. Edit ```time``` based on the timezone the image was taken in. Editing the raw output file into this format will create an object in the ```StarImage``` class.
+
+
+
+
+
+
