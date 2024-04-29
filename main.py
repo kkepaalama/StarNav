@@ -13,8 +13,8 @@ from astropy.coordinates import GCRS
 import astropy.units as u
 
 
-#ITRS(Cel) to ITRS(ECEF)
-def cel2ecef(time, cel, radec, mode):
+#ITRS(eci) to ITRS(ECEF)
+def eci2ecef(time, eci, radec, mode):
     time = time
     t = Time(time, format='iso', scale='utc')
     if mode == 'radec2car':
@@ -28,28 +28,21 @@ def cel2ecef(time, cel, radec, mode):
         trs.representation_type = 'spherical'
         return trs
     if mode == 'car':
-        crs = SkyCoord(x = cel[0], y = cel[1], z = cel[2], obstime = t, frame = 'icrs', representation_type = 'cartesian')
+        crs = SkyCoord(x = eci[0], y = eci[1], z = eci[2], obstime = t, frame = 'icrs', representation_type = 'cartesian')
         trs = crs.itrs
         car = np.array([trs.x, trs.y, trs.z])
         return car
     if mode == 'sph':
-        crs = SkyCoord(x = cel[0], y = cel[1], z = cel[2], obstime = t, frame = 'icrs', representation_type = 'cartesian')
+        crs = SkyCoord(x = eci[0], y = eci[1], z = eci[2], obstime = t, frame = 'icrs', representation_type = 'cartesian')
         trs = crs.itrs
         trs.representation_type = 'spherical'
         return trs
     if mode == 'gcrs':
-        gcrs = SkyCoord(x = cel[0], y = cel[1], z = cel[2], obstime = t, frame = 'gcrs', representation_type = 'cartesian')
+        gcrs = SkyCoord(x = eci[0], y = eci[1], z = eci[2], obstime = t, frame = 'gcrs', representation_type = 'cartesian')
         trs = gcrs.itrs
         trs = np.array([trs.x, trs.y, trs.z])
         return trs
 
-def eci2ecef(time, eci_vector):
-    time = [time]
-    t = Time(time, format = 'iso', scale ='utc')
-    gcrs = GCRS(x = eci_vector[0], y = eci_vector[1], z = eci_vector[2], obstime = t, representation_type = 'cartesian')
-    itrs = gcrs.transform_to(ITRS(obstime = t))
-    return itrs
-    
 ###Davenport q-Method
 #B matrix
 def B(body, trs, w):
